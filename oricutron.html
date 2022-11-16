@@ -135,15 +135,13 @@ The emulator automatically loads an image when a link to page oricutron.html is 
 launch emulator loading file space1999-fr.dsk, if such file is present in same folder of oricutron.html:<br>
 <a href="oricutron.html">space1999-fr.dsk</a><br>
 <br>
-The Disks and Tapes files are in the /readwritefs/ directory of the emulator environment;
-    You may need to go up twice in the directory structure to find this directory.<br>
+The Disks and Tapes files are in the /readwritefs/ directory of the emulator environment, which is filled with .dsk and .tap files
+which are in the same folder of oricutron.html;  you may need to go up twice in the directory structure of Oric filesystem to find this directory.<br>
     Remember to save snapshots, tapes and dsk in this directory as it is the only one
-    that is saved in your browser's storage space.
+    that is saved in your browser's storage space. <br>
     <br>
-    In order to download one tape or dsk file so that you can use it in an emulator
-    on your computer first click on this button and then on the name of the file
-    <br>
-    <button onclick="getFileList()">Get File List</button>
+    Available .dsk and .tap files can also be downloaded: click on the button and then click on the name of the file you want to download:
+    <button onclick="getFileList()">Show available files</button>
     <br>
     <div id="fileList">
 
