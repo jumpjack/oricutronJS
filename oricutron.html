@@ -130,7 +130,12 @@
     }</style>
 </head>
 <body>
-<div align="center">The Disks and Tapes files are in the /readwritefs/ directory!
+<div>
+The emulator automatically loads an image when a link to page oricutron.html is clicked; for example, following link will
+launch emulator loading file space1999-fr.dsk, if such file is present in same folder of oricutron.html:<br>
+<a href="oricutron.html">space1999-fr.dsk</a><br>
+<br>
+The Disks and Tapes files are in the /readwritefs/ directory of the emulator environment;
     You may need to go up twice in the directory structure to find this directory.<br>
     Remember to save snapshots, tapes and dsk in this directory as it is the only one
     that is saved in your browser's storage space.
@@ -146,11 +151,9 @@
 </div>
 <div class=spinner id=spinner></div>
 <div class=emscripten id=status>Downloading...</div>
-Progress bar:<br>
 <div class=emscripten>
     <progress hidden id=progress max=100 value=0></progress>
 </div>
-Emscripten:<br>
 <div class=emscripten_border>
     <canvas class=emscripten id=canvas oncontextmenu=event.preventDefault() tabindex=-1></canvas>
 </div>
@@ -166,8 +169,6 @@ var statusElement = document.getElementById("status"),
 		print: function () {
             var e = document.getElementById("output");
             return e && (e.value = ""), function (t) {
-console.log("t=",t);
-console.log("arguments=",arguments);
                 arguments.length > 1 && (t = Array.prototype.slice.call(arguments).join(" ")), console.log(t), e && (e.value += t + "\n", e.scrollTop = e.scrollHeight)
             }
         }(),
