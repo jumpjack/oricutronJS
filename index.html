@@ -1,21 +1,36 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>Oricutron.js Launcher</title>
 </head>
 <body>
 <h1>Oricutron.js Launcher</h1>
 <p>Please click on one of those links:</p>
 <h2>Disks :</h2>
-<div id='dskList'>
+<div id="dskList">
 
+<a href="https://torguet.net/oric/oricutron.html">BuggyBoy.dsk</a><br>
+<a href="https://torguet.net/oric/oricutron.html">Pulsoids.dsk</a><br>
+<a href="https://torguet.net/oric/oricutron.html">Quintessential.dsk</a><br>
+<a href="https://torguet.net/oric/oricutron.html">SEDO40u.DSK</a><br>
+<a href="https://torguet.net/oric/oricutron.html">ZipNZapE.dsk</a><br>
+<a href="https://torguet.net/oric/oricutron.html">aigledor.dsk</a><br>
+<a href="https://torguet.net/oric/oricutron.html">barbitoric.dsk</a><br>
+<a href="https://torguet.net/oric/oricutron.html">space1999-fr.dsk</a><br>
 </div>
 <h2>Tapes :</h2>
-<div id='tapList'>
+<div id="tapList">
 
+<a href="https://torguet.net/oric/oricutron.html">ATMDEMm.tap</a><br>
+<a href="https://torguet.net/oric/oricutron.html">Cyclotron.tap</a><br>
+<a href="https://torguet.net/oric/oricutron.html">THEMm.tap</a><br>
+<a href="https://torguet.net/oric/oricutron.html">defence-force.tap</a><br>
+<a href="https://torguet.net/oric/oricutron.html">thehobbit.tap</a><br>
 </div>
-<script src='dir.php'></script>
+<script>
+    // this lists dsk and tap files
+    var dskFiles = ["BuggyBoy.dsk","Pulsoids.dsk","Quintessential.dsk","SEDO40u.DSK","ZipNZapE.dsk","aigledor.dsk","barbitoric.dsk","space1999-fr.dsk","space1999-en.dsk"];
+    var tapFiles = ["ATMDEMm.tap","Cyclotron.tap","THEMm.tap","defence-force.tap","thehobbit.tap"];
+</script>
 <script>
     function createLink(file) {
         var newLink = document.createElement('a');
