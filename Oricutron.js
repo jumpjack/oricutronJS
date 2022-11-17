@@ -1172,7 +1172,7 @@ console.log("createWasm, info (cercare ha e pa):",info);
 console.log("   exports:",exports);
 		Module["asm"] = exports;
 		wasmTable = Module["asm"]["Kd"];
-console.log("   mio test:",Module["asm"]["pa"], info.a["pa"]);
+console.log("   mio test:",Module["asm"]["pa"], info.a["pa"], Module, info);
 		removeRunDependency("wasm-instantiate")
 	}
 	addRunDependency("wasm-instantiate");
