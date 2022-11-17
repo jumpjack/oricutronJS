@@ -32,7 +32,7 @@ console.log("REMOTE_PACKAGE_SIZE=",REMOTE_PACKAGE_SIZE);
 console.log("PACKAGE_UUID=",PACKAGE_UUID);
 
 		function fetchRemotePackage(packageName, packageSize, callback, errback) {
-console.log("fetchRemotePackage(packageName, packageSize, callback, errback)",packageName, packageSize, callback, errback);
+console.log("fetchRemotePackage(packageName, packageSize, callback, errback)",packageName, packageSize);
 			var xhr = new XMLHttpRequest;
 			xhr.open("GET", packageName, true);
 			xhr.responseType = "arraybuffer";
@@ -144,6 +144,7 @@ console.log("processPackageData=",arrayBuffer);
 				var byteArray = new Uint8Array(arrayBuffer);
 				DataRequest.prototype.byteArray = byteArray;
 				var files = metadata["files"];
+console.log("processPackageData files=",files);
 				for (var i = 0; i < files.length; ++i) {
 					DataRequest.prototype.requests[files[i].filename].onload()
 				}
