@@ -138,6 +138,7 @@ console.log("fetchedCallback=",fetchedCallback);
 			}
 
 			function processPackageData(arrayBuffer) {
+console.log("processPackageData=",processPackageData);
 				assert(arrayBuffer, "Loading data file failed.");
 				assert(arrayBuffer instanceof ArrayBuffer, "bad input to processPackageData");
 				var byteArray = new Uint8Array(arrayBuffer);
