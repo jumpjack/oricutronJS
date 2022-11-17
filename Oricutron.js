@@ -4390,7 +4390,7 @@ console.log("   doReadv=",stream.path);
 	},
 	getStreamFromFD: function(fd) {
 		var stream = FS.getStream(fd);
-console.log("   getStreamFromFD=", stream.path);
+
 		if (!stream) throw new FS.ErrnoError(8);
 		return stream
 	},
@@ -8713,6 +8713,7 @@ function _fd_close(fd) {
 function _fd_fdstat_get(fd, pbuf) {
 	try {
 		var stream = SYSCALLS.getStreamFromFD(fd);
+console.log("_fd_fdstat_get path=",stream.path);
 		var type = stream.tty ? 2 : FS.isDir(stream.mode) ? 3 : FS.isLink(stream.mode) ? 7 : 4;
 		HEAP8[pbuf >> 0] = type;
 		return 0
@@ -8723,9 +8724,9 @@ function _fd_fdstat_get(fd, pbuf) {
 }
 
 function _fd_read(fd, iov, iovcnt, pnum) {
-
 	try {
 		var stream = SYSCALLS.getStreamFromFD(fd);
+console.log("_fd_read path=",stream.path);
 		var num = SYSCALLS.doReadv(stream, iov, iovcnt);
 		HEAP32[pnum >> 2] = num;
 		return 0
@@ -8738,6 +8739,7 @@ function _fd_read(fd, iov, iovcnt, pnum) {
 function _fd_seek(fd, offset_low, offset_high, whence, newOffset) {
 	try {
 		var stream = SYSCALLS.getStreamFromFD(fd);
+console.log("_fd_seek path=",stream.path);
 		var HIGH_OFFSET = 4294967296;
 		var offset = offset_high * HIGH_OFFSET + (offset_low >>> 0);
 		var DOUBLE_LIMIT = 9007199254740992;
