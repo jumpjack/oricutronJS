@@ -1171,7 +1171,7 @@ console.log("createWasm, info (cercare ha e pa):",info);
 console.log("   exports:",exports);
 		Module["asm"] = exports;
 		wasmTable = Module["asm"]["Kd"];
-console.log("   mio test:",Module["asm"]["pa"]);
+console.log("   mio test:",Module["asm"]["pa"], info["pa"]);
 		removeRunDependency("wasm-instantiate")
 	}
 	addRunDependency("wasm-instantiate");
@@ -1202,7 +1202,9 @@ console.log("   result:", result);
 			return fetch(wasmBinaryFile, {
 				credentials: "same-origin"
 			}).then(function(response) {
+console.log("instantiateAsync wasmBinary response:",response);
 				var result = WebAssembly.instantiateStreaming(response, info);
+console.log("instantiateAsync wasmBinary:", result);
 				Promise.all([response.clone().arrayBuffer(), result]).then(function(results) {
 					wasmOffsetConverter = new WasmOffsetConverter(new Uint8Array(results[0]), results[1].module);
 					removeRunDependency("offset-converter")
