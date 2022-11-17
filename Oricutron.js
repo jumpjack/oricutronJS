@@ -4354,7 +4354,7 @@ console.log("   doDup=",path);
 		return FS.open(path, flags, 0, suggestFD, suggestFD).fd
 	},
 	doReadv: function(stream, iov, iovcnt, offset) {
-console.log("   doReadv=",stream, iov, iovcnt, offset);
+console.log("   doReadv=",stream.path);
 		var ret = 0;
 		for (var i = 0; i < iovcnt; i++) {
 			var ptr = HEAP32[iov + i * 8 >> 2];
