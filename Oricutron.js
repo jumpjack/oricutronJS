@@ -561,6 +561,7 @@ console.log("    ENVIRONMENT_IS_WEB");
 	} {
 		read_ = function shell_read(url) {
 			var xhr = new XMLHttpRequest;
+console.log("Retrieving in shell_read:", url);
 			xhr.open("GET", url, false);
 			xhr.send(null);
 			return xhr.responseText
@@ -568,6 +569,7 @@ console.log("    ENVIRONMENT_IS_WEB");
 		if (ENVIRONMENT_IS_WORKER) {
 			readBinary = function readBinary(url) {
 				var xhr = new XMLHttpRequest;
+console.log("ENVIRONMENT_IS_WORKER - Retrieving in readBinary:", url);
 				xhr.open("GET", url, false);
 				xhr.responseType = "arraybuffer";
 				xhr.send(null);
@@ -576,6 +578,7 @@ console.log("    ENVIRONMENT_IS_WEB");
 		}
 		readAsync = function readAsync(url, onload, onerror) {
 			var xhr = new XMLHttpRequest;
+console.log("Retrieving in readAsync:", url);
 			xhr.open("GET", url, true);
 			xhr.responseType = "arraybuffer";
 			xhr.onload = function xhr_onload() {
@@ -590,6 +593,7 @@ console.log("    ENVIRONMENT_IS_WEB");
 		}
 	}
 	setWindowTitle = function(title) {
+console.log("title",title);
 		document.title = title
 	}
 } else {}
