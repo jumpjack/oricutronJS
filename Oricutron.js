@@ -2190,7 +2190,7 @@ var MEMFS = {
 	},
 	stream_ops: {
 		read: function(stream, buffer, offset, length, position) {
-console.log("stream_ops read stream:", stream);
+console.log("stream_ops read stream:", stream.path);
 			var contents = stream.node.contents;
 			if (position >= stream.node.usedBytes) return 0;
 			var size = Math.min(stream.node.usedBytes - position, length);
@@ -2202,7 +2202,7 @@ console.log("stream_ops read stream:", stream);
 			return size
 		},
 		write: function(stream, buffer, offset, length, position, canOwn) {
-console.log("stream_ops write stream:", stream);
+console.log("stream_ops write stream:", stream.path);
 			if (!length) return 0;
 			var node = stream.node;
 			node.timestamp = Date.now();
