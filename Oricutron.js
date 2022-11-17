@@ -116,6 +116,7 @@ console.log("fetchedCallback=",fetchedCallback);
 			DataRequest.prototype = {
 				requests: {},
 				open: function(mode, name) {
+console.log("DataRequest,name:",this, name);
 					this.name = name;
 					this.requests[name] = this;
 					Module["addRunDependency"]("fp " + this.name)
@@ -127,12 +128,14 @@ console.log("fetchedCallback=",fetchedCallback);
 				},
 				finish: function(byteArray) {
 					var that = this;
+console.log("DataRequest,FS_createDataFile name:",this.name);
 					Module["FS_createDataFile"](this.name, null, byteArray, true, true, true);
 					Module["removeRunDependency"]("fp " + that.name);
 					this.requests[this.name] = null
 				}
 			};
 			var files = metadata["files"];
+console.log("DataRequest,FS_createDataFile files:",metadata["files"]);
 			for (var i = 0; i < files.length; ++i) {
 				new DataRequest(files[i]["start"], files[i]["end"], files[i]["audio"]).open("GET", files[i]["filename"])
 			}
