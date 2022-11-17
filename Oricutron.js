@@ -4390,7 +4390,7 @@ console.log("   doWritev=",stream, iov, iovcnt, offset);
 	},
 	getStreamFromFD: function(fd) {
 		var stream = FS.getStream(fd);
-console.log("   getStreamFromFD=",stream);
+console.log("   getStreamFromFD=",fd, stream);
 		if (!stream) throw new FS.ErrnoError(8);
 		return stream
 	},
@@ -8723,6 +8723,7 @@ function _fd_fdstat_get(fd, pbuf) {
 }
 
 function _fd_read(fd, iov, iovcnt, pnum) {
+console.log("_fd_read:", fd, iov, iovcnt, pnum);
 	try {
 		var stream = SYSCALLS.getStreamFromFD(fd);
 		var num = SYSCALLS.doReadv(stream, iov, iovcnt);
