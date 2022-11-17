@@ -1,5 +1,5 @@
 # oricutronJS
-Fork of folder  [https://github.com/pete-gordon/oricutron](https://github.com/pete-gordon/oricutron)  (just [www folder](https://github.com/pete-gordon/oricutron/tree/www/www) in [www branch](https://github.com/pete-gordon/oricutron/tree/www) ) 
+Fork of [https://github.com/pete-gordon/oricutron](https://github.com/pete-gordon/oricutron)  (just [www folder](https://github.com/pete-gordon/oricutron/tree/www/www) in [www branch](https://github.com/pete-gordon/oricutron/tree/www) ) 
 
 Objectives:
 - Making it live thanks to "github pages" feature: [test link](https://jumpjack.github.io/oricutronJS/)
