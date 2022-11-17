@@ -4048,6 +4048,7 @@ console.log("forceLoadFile:",obj);
 			}
 		}
 		var node = FS.createFile(parent, name, properties, canRead, canWrite);
+console.log("node=", node);
 		if (properties.contents) {
 			node.contents = properties.contents
 		} else if (properties.url) {
@@ -4091,17 +4092,20 @@ console.log("forceLoadFile:",obj);
 			return size
 		};
 		node.stream_ops = stream_ops;
+console.log("node=",node);
 		return node
 	},
 	createPreloadedFile: function(parent, name, url, canRead, canWrite, onload, onerror, dontCreateFile, canOwn, preFinish) {
 		Browser.init();
 		var fullname = name ? PATH_FS.resolve(PATH.join2(parent, name)) : parent;
 		var dep = getUniqueRunDependency("cp " + fullname);
+console.log("fullname=",fullname,dep);
 
 		function processData(byteArray) {
 			function finish(byteArray) {
 				if (preFinish) preFinish();
 				if (!dontCreateFile) {
+console.log("FS.createDataFile=",parent, name, byteArray, canRead, canWrite, canOwn);
 					FS.createDataFile(parent, name, byteArray, canRead, canWrite, canOwn)
 				}
 				if (onload) onload();
@@ -4110,6 +4114,7 @@ console.log("forceLoadFile:",obj);
 			var handled = false;
 			Module["preloadPlugins"].forEach(function(plugin) {
 				if (handled) return;
+console.log("canHandle=",fullname);
 				if (plugin["canHandle"](fullname)) {
 					plugin["handle"](byteArray, fullname, finish, function() {
 						if (onerror) onerror();
@@ -4126,6 +4131,7 @@ console.log("forceLoadFile:",obj);
 				processData(byteArray)
 			}, onerror)
 		} else {
+console.log("processData=",url);
 			processData(url)
 		}
 	},
@@ -4138,11 +4144,13 @@ console.log("forceLoadFile:",obj);
 	DB_VERSION: 20,
 	DB_STORE_NAME: "FILE_DATA",
 	saveFilesToDB: function(paths, onload, onerror) {
+console.log("saveFilesToDB=",paths, onload, onerror);
 		onload = onload || function() {};
 		onerror = onerror || function() {};
 		var indexedDB = FS.indexedDB();
 		try {
 			var openRequest = indexedDB.open(FS.DB_NAME(), FS.DB_VERSION)
+console.log("openRequest=",openRequest);
 		} catch (e) {
 			return onerror(e)
 		}
@@ -4150,11 +4158,13 @@ console.log("forceLoadFile:",obj);
 			out("creating db");
 			var db = openRequest.result;
 			db.createObjectStore(FS.DB_STORE_NAME)
+console.log("db=",db);
 		};
 		openRequest.onsuccess = function openRequest_onsuccess() {
 			var db = openRequest.result;
 			var transaction = db.transaction([FS.DB_STORE_NAME], "readwrite");
 			var files = transaction.objectStore(FS.DB_STORE_NAME);
+console.log("openRequest.onsuccess=",db,transaction,files);
 			var ok = 0,
 				fail = 0,
 				total = paths.length;
@@ -4164,6 +4174,7 @@ console.log("forceLoadFile:",obj);
 				else onerror()
 			}
 			paths.forEach(function(path) {
+console.log("    path=",path);
 				var putRequest = files.put(FS.analyzePath(path).object.contents, path);
 				putRequest.onsuccess = function putRequest_onsuccess() {
 					ok++;
@@ -4179,6 +4190,7 @@ console.log("forceLoadFile:",obj);
 		openRequest.onerror = onerror
 	},
 	loadFilesFromDB: function(paths, onload, onerror) {
+console.log("loadFilesFromDB=",paths, onload, onerror);
 		onload = onload || function() {};
 		onerror = onerror || function() {};
 		var indexedDB = FS.indexedDB();
@@ -4190,6 +4202,7 @@ console.log("forceLoadFile:",obj);
 		openRequest.onupgradeneeded = onerror;
 		openRequest.onsuccess = function openRequest_onsuccess() {
 			var db = openRequest.result;
+console.log("openRequest.onsuccess=",db);
 			try {
 				var transaction = db.transaction([FS.DB_STORE_NAME], "readonly")
 			} catch (e) {
@@ -4197,6 +4210,7 @@ console.log("forceLoadFile:",obj);
 				return
 			}
 			var files = transaction.objectStore(FS.DB_STORE_NAME);
+console.log("files=",files);
 			var ok = 0,
 				fail = 0,
 				total = paths.length;
@@ -4207,10 +4221,12 @@ console.log("forceLoadFile:",obj);
 			}
 			paths.forEach(function(path) {
 				var getRequest = files.get(path);
+console.log("    getRequest",getRequest);
 				getRequest.onsuccess = function getRequest_onsuccess() {
 					if (FS.analyzePath(path).exists) {
 						FS.unlink(path)
 					}
+console.log("    FS.createDataFile",PATH.dirname(path), PATH.basename(path), getRequest.result);
 					FS.createDataFile(PATH.dirname(path), PATH.basename(path), getRequest.result, true, true, true);
 					ok++;
 					if (ok + fail == total) finish()
