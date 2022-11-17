@@ -4367,7 +4367,7 @@ console.log("   doReadv=",stream, iov, iovcnt, offset);
 		return ret
 	},
 	doWritev: function(stream, iov, iovcnt, offset) {
-console.log("   doWritev=",stream, iov, iovcnt, offset);
+
 		var ret = 0;
 		for (var i = 0; i < iovcnt; i++) {
 			var ptr = HEAP32[iov + i * 8 >> 2];
@@ -4390,7 +4390,7 @@ console.log("   doWritev=",stream, iov, iovcnt, offset);
 	},
 	getStreamFromFD: function(fd) {
 		var stream = FS.getStream(fd);
-console.log("   getStreamFromFD=",fd, stream);
+console.log("   getStreamFromFD=", stream.path);
 		if (!stream) throw new FS.ErrnoError(8);
 		return stream
 	},
@@ -4582,11 +4582,11 @@ function ___sys_mkdir(path, mode) {
 }
 
 function ___sys_open(path, flags, varargs) {
-console.log("___sys_open=",path, flags, varargs);
+
 	SYSCALLS.varargs = varargs;
 	try {
 		var pathname = SYSCALLS.getStr(path);
-console.log("   pathname=",path, flags, varargs);
+
 		var mode = SYSCALLS.get();
 		var stream = FS.open(pathname, flags, mode);
 		return stream.fd
@@ -8723,7 +8723,7 @@ function _fd_fdstat_get(fd, pbuf) {
 }
 
 function _fd_read(fd, iov, iovcnt, pnum) {
-console.log("_fd_read:", fd, iov, iovcnt, pnum);
+
 	try {
 		var stream = SYSCALLS.getStreamFromFD(fd);
 		var num = SYSCALLS.doReadv(stream, iov, iovcnt);
