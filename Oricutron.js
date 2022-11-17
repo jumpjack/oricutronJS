@@ -1161,6 +1161,7 @@ WasmOffsetConverter.prototype.getName = function(offset) {
 };
 
 function createWasm() {
+console.log("Creating WASM...");
 	var info = {
 		"a": asmLibraryArg
 	};
@@ -1225,6 +1226,7 @@ console.log("instantiateAsync wasmBinary:", result);
 		try {
 			var exports = Module["instantiateWasm"](info, receiveInstance);
 			exports = Asyncify.instrumentWasmExports(exports);
+console.log("instantiateWasm exports:",exports);
 			return exports
 		} catch (e) {
 			err("Module.instantiateWasm callback failed with error: " + e);
