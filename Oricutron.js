@@ -1164,7 +1164,7 @@ function createWasm() {
 	var info = {
 		"a": asmLibraryArg
 	};
-
+console.log("createWasm, info (cercare ha e pa):",info);
 	function receiveInstance(instance, module) {
 		var exports = instance.exports;
 		exports = Asyncify.instrumentWasmExports(exports);
@@ -1181,8 +1181,10 @@ function createWasm() {
 
 	function instantiateArrayBuffer(receiver) {
 		return getBinaryPromise().then(function(binary) {
+console.log("createWasm, instantiateArrayBuffer:", binary, info);
 			var result = WebAssembly.instantiate(binary, info);
 			result.then(function(instance) {
+console.log("   result:", result);
 				wasmOffsetConverter = new WasmOffsetConverter(binary, instance.module);
 				removeRunDependency("offset-converter")
 			});
