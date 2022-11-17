@@ -428,6 +428,7 @@ console.log("NOT run with FS");
 
 var moduleOverrides = {};
 var key;
+console.log("Module",Module);
 for (key in Module) {
 	if (Module.hasOwnProperty(key)) {
 		moduleOverrides[key] = Module[key]
@@ -450,13 +451,13 @@ ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIRONME
 var scriptDirectory = "";
 
 function locateFile(path) {
-console.log("path,scriptDirectory=",path, scriptDirectory)
+console.log("Locating path,scriptDirectory... ",path, scriptDirectory)
 	if (Module["locateFile"]) {
 		var dummy =  Module["locateFile"](path, scriptDirectory);
-console.log("Return  Module['locateFile'](path, scriptDirectory)=",dummy)
+console.log("Located:  Module['locateFile'](path, scriptDirectory)=",dummy)
 		return dummy
 	}
-console.log("scriptDirectory + path=",scriptDirectory + path)
+console.log("Not located: scriptDirectory + path=",scriptDirectory + path)
 	return scriptDirectory + path
 }
 
@@ -465,12 +466,16 @@ var read_, readAsync, readBinary, setWindowTitle;
 var nodeFS;
 var nodePath;
 if (ENVIRONMENT_IS_NODE) {
+console.log("ENVIRONMENT_IS_NODE");
 	if (ENVIRONMENT_IS_WORKER) {
+console.log("    ENVIRONMENT_IS_WORKER");
 		scriptDirectory = require("path").dirname(scriptDirectory) + "/"
 	} else {
+console.log("    ENVIRONMENT is NOT WORKER");
 		scriptDirectory = __dirname + "/"
 	}
 	read_ = function shell_read(filename, binary) {
+console.log("shell_read filename, binary", filename, binary);
 		if (!nodeFS) nodeFS = require("fs");
 		if (!nodePath) nodePath = require("path");
 		filename = nodePath["normalize"](filename);
@@ -504,18 +509,22 @@ if (ENVIRONMENT_IS_NODE) {
 		return "[Emscripten Module object]"
 	}
 } else if (ENVIRONMENT_IS_SHELL) {
+console.log("ENVIRONMENT_IS_SHELL");
 	if (typeof read != "undefined") {
 		read_ = function shell_read(f) {
+console.log("shell_read(f)",f);
 			return read(f)
 		}
 	}
 	readBinary = function readBinary(f) {
+console.log("readBinary(f)",f);
 		var data;
 		if (typeof readbuffer === "function") {
 			return new Uint8Array(readbuffer(f))
 		}
 		data = read(f, "binary");
 		assert(typeof data === "object");
+console.log("data=",data);
 		return data
 	};
 	if (typeof scriptArgs != "undefined") {
@@ -523,6 +532,8 @@ if (ENVIRONMENT_IS_NODE) {
 	} else if (typeof arguments != "undefined") {
 		arguments_ = arguments
 	}
+console.log("arguments_=",arguments_);
+
 	if (typeof quit === "function") {
 		quit_ = function(status) {
 			quit(status)
@@ -534,11 +545,15 @@ if (ENVIRONMENT_IS_NODE) {
 		console.warn = console.error = typeof printErr !== "undefined" ? printErr : print
 	}
 } else if (ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER) {
+console.log("ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER");
 	if (ENVIRONMENT_IS_WORKER) {
+console.log("    ENVIRONMENT_IS_WORKER");
 		scriptDirectory = self.location.href
 	} else if (typeof document !== "undefined" && document.currentScript) {
+console.log("    ENVIRONMENT_IS_WEB");
 		scriptDirectory = document.currentScript.src
 	}
+
 	if (scriptDirectory.indexOf("blob:") !== 0) {
 		scriptDirectory = scriptDirectory.substr(0, scriptDirectory.lastIndexOf("/") + 1)
 	} else {
