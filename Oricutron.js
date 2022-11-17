@@ -3859,7 +3859,7 @@ console.log("  created:", path, mode);
 		return FS.create(path, mode)
 	},
 	createDataFile: function(parent, name, data, canRead, canWrite, canOwn) {
-console.log("createDataFile:", parent, name, data, canRead, canWrite, canOwn);
+//console.log("createDataFile:", parent, name, data, canRead, canWrite, canOwn);
 		var path = name ? PATH.join2(typeof parent === "string" ? parent : FS.getPath(parent), name) : parent;
 		var mode = FS.getMode(canRead, canWrite);
 		var node = FS.create(path, mode);
@@ -3875,7 +3875,7 @@ console.log("createDataFile:", parent, name, data, canRead, canWrite, canOwn);
 			FS.close(stream);
 			FS.chmod(node, mode)
 		}
-console.log("    created:", node);
+//console.log("    created:", node);
 		return node
 	},
 	createDevice: function(parent, name, input, output) {
@@ -4257,6 +4257,7 @@ var SYSCALLS = {
 			}
 			path = PATH.join2(dir, path)
 		}
+console.log("path=",path);
 		return path
 	},
 	doStat: function(func, path, buf) {
@@ -4314,8 +4315,10 @@ var SYSCALLS = {
 		return 0
 	},
 	doReadlink: function(path, buf, bufsize) {
+console.log("doReadlink=",path);
 		if (bufsize <= 0) return -28;
 		var ret = FS.readlink(path);
+console.log("   ret=",ret);
 		var len = Math.min(bufsize, lengthBytesUTF8(ret));
 		var endChar = HEAP8[buf + len];
 		stringToUTF8(ret, buf, bufsize + 1);
@@ -4323,6 +4326,7 @@ var SYSCALLS = {
 		return len
 	},
 	doAccess: function(path, amode) {
+console.log("   doAccess=",path);
 		if (amode & ~7) {
 			return -28
 		}
@@ -4344,11 +4348,13 @@ var SYSCALLS = {
 		return 0
 	},
 	doDup: function(path, flags, suggestFD) {
+console.log("   doDup=",path);
 		var suggest = FS.getStream(suggestFD);
 		if (suggest) FS.close(suggest);
 		return FS.open(path, flags, 0, suggestFD, suggestFD).fd
 	},
 	doReadv: function(stream, iov, iovcnt, offset) {
+console.log("   doReadv=",stream, iov, iovcnt, offset);
 		var ret = 0;
 		for (var i = 0; i < iovcnt; i++) {
 			var ptr = HEAP32[iov + i * 8 >> 2];
@@ -4361,6 +4367,7 @@ var SYSCALLS = {
 		return ret
 	},
 	doWritev: function(stream, iov, iovcnt, offset) {
+console.log("   doWritev=",stream, iov, iovcnt, offset);
 		var ret = 0;
 		for (var i = 0; i < iovcnt; i++) {
 			var ptr = HEAP32[iov + i * 8 >> 2];
@@ -4383,6 +4390,7 @@ var SYSCALLS = {
 	},
 	getStreamFromFD: function(fd) {
 		var stream = FS.getStream(fd);
+console.log("   getStreamFromFD=",stream);
 		if (!stream) throw new FS.ErrnoError(8);
 		return stream
 	},
@@ -4574,9 +4582,11 @@ function ___sys_mkdir(path, mode) {
 }
 
 function ___sys_open(path, flags, varargs) {
+console.log("___sys_open=",path, flags, varargs);
 	SYSCALLS.varargs = varargs;
 	try {
 		var pathname = SYSCALLS.getStr(path);
+console.log("   pathname=",path, flags, varargs);
 		var mode = SYSCALLS.get();
 		var stream = FS.open(pathname, flags, mode);
 		return stream.fd
@@ -4587,6 +4597,7 @@ function ___sys_open(path, flags, varargs) {
 }
 
 function ___sys_readlink(path, buf, bufsize) {
+console.log("___sys_readlink=",path);
 	try {
 		path = SYSCALLS.getStr(path);
 		return SYSCALLS.doReadlink(path, buf, bufsize)
@@ -5190,6 +5201,7 @@ var Browser = {
 		} [name.substr(name.lastIndexOf(".") + 1)]
 	},
 	getUserMedia: function(func) {
+console.log("getUserMediafunc",func);
 		if (!window.getUserMedia) {
 			window.getUserMedia = navigator["getUserMedia"] || navigator["mozGetUserMedia"]
 		}
@@ -5293,6 +5305,7 @@ var Browser = {
 		}
 	},
 	asyncLoad: function(url, onload, onerror, noRunDep) {
+console.log("asyncLoad",url, onload, onerror, noRunDep);
 		var dep = !noRunDep ? getUniqueRunDependency("al " + url) : "";
 		readAsync(url, function(arrayBuffer) {
 			assert(arrayBuffer, 'Loading data file "' + url + '" failed (no arrayBuffer).');
