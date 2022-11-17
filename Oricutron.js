@@ -1168,8 +1168,10 @@ console.log("createWasm, info (cercare ha e pa):",info);
 	function receiveInstance(instance, module) {
 		var exports = instance.exports;
 		exports = Asyncify.instrumentWasmExports(exports);
+console.log("   exports:",exports);
 		Module["asm"] = exports;
 		wasmTable = Module["asm"]["Kd"];
+console.log("   mio test:",Module["asm"]["pa"]);
 		removeRunDependency("wasm-instantiate")
 	}
 	addRunDependency("wasm-instantiate");
