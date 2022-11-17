@@ -5,6 +5,8 @@ if (!Module.expectedDataFileDownloads) {
 Module.expectedDataFileDownloads++;
 (function() {
 	var loadPackage = function(metadata) {
+console.log("metadata=",metadata);
+console.log("typeof window=",typeof window);
 		var PACKAGE_PATH;
 		if (typeof window === "object") {
 			PACKAGE_PATH = window["encodeURIComponent"](window.location.pathname.toString().substring(0, window.location.pathname.toString().lastIndexOf("/")) + "/")
@@ -13,15 +15,21 @@ Module.expectedDataFileDownloads++;
 		} else {
 			throw "using preloaded data can only be done on a web page or in a web worker"
 		}
+console.log("PACKAGE_PATH=",PACKAGE_PATH);
+
 		var PACKAGE_NAME = "Oricutron.data";
 		var REMOTE_PACKAGE_BASE = "Oricutron.data";
 		if (typeof Module["locateFilePackage"] === "function" && !Module["locateFile"]) {
 			Module["locateFile"] = Module["locateFilePackage"];
 			err("warning: you defined Module.locateFilePackage, that has been renamed to Module.locateFile (using your locateFilePackage for now)")
 		}
+
 		var REMOTE_PACKAGE_NAME = Module["locateFile"] ? Module["locateFile"](REMOTE_PACKAGE_BASE, "") : REMOTE_PACKAGE_BASE;
 		var REMOTE_PACKAGE_SIZE = metadata["remote_package_size"];
 		var PACKAGE_UUID = metadata["package_uuid"];
+console.log("REMOTE_PACKAGE_NAME=",REMOTE_PACKAGE_NAME);
+console.log("REMOTE_PACKAGE_SIZE=",REMOTE_PACKAGE_SIZE);
+console.log("PACKAGE_UUID=",PACKAGE_UUID);
 
 		function fetchRemotePackage(packageName, packageSize, callback, errback) {
 			var xhr = new XMLHttpRequest;
@@ -74,8 +82,11 @@ Module.expectedDataFileDownloads++;
 		function handleError(error) {
 			console.error("package error:", error)
 		}
+
+
 		var fetchedCallback = null;
 		var fetched = Module["getPreloadedPackage"] ? Module["getPreloadedPackage"](REMOTE_PACKAGE_NAME, REMOTE_PACKAGE_SIZE) : null;
+console.log("fetched=",fetched);
 		if (!fetched) fetchRemotePackage(REMOTE_PACKAGE_NAME, REMOTE_PACKAGE_SIZE, function(data) {
 			if (fetchedCallback) {
 				fetchedCallback(data);
@@ -84,6 +95,7 @@ Module.expectedDataFileDownloads++;
 				fetched = data
 			}
 		}, handleError);
+console.log("fetchedCallback=",fetchedCallback);
 
 		function runWithFS() {
 			function assert(check, msg) {
@@ -147,13 +159,18 @@ Module.expectedDataFileDownloads++;
 				fetchedCallback = processPackageData
 			}
 		}
+
 		if (Module["calledRun"]) {
+console.log("Run with FS");
 			runWithFS()
 		} else {
+console.log("NOT run with FS");
 			if (!Module["preRun"]) Module["preRun"] = [];
 			Module["preRun"].push(runWithFS)
 		}
-	};
+
+	}; // loadpackage function definition
+
 	loadPackage({
 		"files": [{
 			"filename": "/assets/oricutron.cfg",
@@ -404,7 +421,8 @@ Module.expectedDataFileDownloads++;
 		"remote_package_size": 1608333,
 		"package_uuid": "988be6b8-06e3-4f13-aa45-30b487b258ed"
 	})
-})();
+})(); // main function
+
 var moduleOverrides = {};
 var key;
 for (key in Module) {
@@ -412,6 +430,7 @@ for (key in Module) {
 		moduleOverrides[key] = Module[key]
 	}
 }
+
 var arguments_ = [];
 var thisProgram = "./this.program";
 var quit_ = function(status, toThrow) {
@@ -428,11 +447,17 @@ ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIRONME
 var scriptDirectory = "";
 
 function locateFile(path) {
+console.log("path,scriptDirectory=",path, scriptDirectory)
 	if (Module["locateFile"]) {
-		return Module["locateFile"](path, scriptDirectory)
+		var dummy =  Module["locateFile"](path, scriptDirectory);
+console.log("Return  Module['locateFile'](path, scriptDirectory)=",dummy)
+		return dummy
 	}
+console.log("scriptDirectory + path=",scriptDirectory + path)
 	return scriptDirectory + path
 }
+
+
 var read_, readAsync, readBinary, setWindowTitle;
 var nodeFS;
 var nodePath;
@@ -550,6 +575,7 @@ if (ENVIRONMENT_IS_NODE) {
 		document.title = title
 	}
 } else {}
+
 var out = Module["print"] || console.log.bind(console);
 var err = Module["printErr"] || console.warn.bind(console);
 for (key in moduleOverrides) {
@@ -562,6 +588,11 @@ if (Module["arguments"]) arguments_ = Module["arguments"];
 if (Module["thisProgram"]) thisProgram = Module["thisProgram"];
 if (Module["quit"]) quit_ = Module["quit"];
 var STACK_ALIGN = 16;
+
+
+console.log("arguments=",arguments_);
+console.log("thisProgram=",thisProgram);
+console.log("quit=",quit_);
 
 function alignMemory(size, factor) {
 	if (!factor) factor = STACK_ALIGN;
@@ -579,6 +610,7 @@ var tempRet0 = 0;
 var setTempRet0 = function(value) {
 	tempRet0 = value
 };
+
 var wasmBinary;
 if (Module["wasmBinary"]) wasmBinary = Module["wasmBinary"];
 var noExitRuntime;
@@ -9477,6 +9509,7 @@ function callMain(args) {
 }
 
 function run(args) {
+console.log("run with args=",args,arguments_);
 	args = args || arguments_;
 	if (runDependencies > 0) {
 		return
