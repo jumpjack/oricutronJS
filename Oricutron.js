@@ -1172,7 +1172,7 @@ console.log("createWasm, info (cercare ha e pa):",info);
 console.log("   exports:",exports);
 		Module["asm"] = exports;
 		wasmTable = Module["asm"]["Kd"];
-console.log("   mio test:",Module["asm"]["pa"], info["pa"]);
+console.log("   mio test:",Module["asm"]["pa"], info.a["pa"]);
 		removeRunDependency("wasm-instantiate")
 	}
 	addRunDependency("wasm-instantiate");
@@ -1184,7 +1184,7 @@ console.log("   mio test:",Module["asm"]["pa"], info["pa"]);
 
 	function instantiateArrayBuffer(receiver) {
 		return getBinaryPromise().then(function(binary) {
-console.log("createWasm, instantiateArrayBuffer:", binary, info);
+console.log("createWasm instantiateArrayBuffer - receiver, binary, info:", receiver, binary, info);
 			var result = WebAssembly.instantiate(binary, info);
 			result.then(function(instance) {
 console.log("   result:", result);
@@ -1205,7 +1205,7 @@ console.log("   result:", result);
 			}).then(function(response) {
 console.log("instantiateAsync wasmBinary response:",response);
 				var result = WebAssembly.instantiateStreaming(response, info);
-console.log("instantiateAsync wasmBinary:", result);
+console.log("instantiateAsync wasmBinary result:", result);
 				Promise.all([response.clone().arrayBuffer(), result]).then(function(results) {
 					wasmOffsetConverter = new WasmOffsetConverter(new Uint8Array(results[0]), results[1].module);
 					removeRunDependency("offset-converter")
