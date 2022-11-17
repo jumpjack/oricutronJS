@@ -3836,6 +3836,7 @@ var FS = {
 		return ret
 	},
 	createPath: function(parent, path, canRead, canWrite) {
+console.log("CreatePath:", parent, path, canRead, canWrite);
 		parent = typeof parent === "string" ? parent : FS.getPath(parent);
 		var parts = path.split("/").reverse();
 		while (parts.length) {
@@ -3847,14 +3848,18 @@ var FS = {
 			} catch (e) {}
 			parent = current
 		}
+console.log("   created:", current);
 		return current
 	},
 	createFile: function(parent, name, properties, canRead, canWrite) {
+console.log("createFile:", parent, name, properties, canRead, canWrite);
 		var path = PATH.join2(typeof parent === "string" ? parent : FS.getPath(parent), name);
 		var mode = FS.getMode(canRead, canWrite);
+console.log("  created:", path, mode);
 		return FS.create(path, mode)
 	},
 	createDataFile: function(parent, name, data, canRead, canWrite, canOwn) {
+console.log("createDataFile:", parent, name, data, canRead, canWrite, canOwn);
 		var path = name ? PATH.join2(typeof parent === "string" ? parent : FS.getPath(parent), name) : parent;
 		var mode = FS.getMode(canRead, canWrite);
 		var node = FS.create(path, mode);
@@ -3870,9 +3875,11 @@ var FS = {
 			FS.close(stream);
 			FS.chmod(node, mode)
 		}
+console.log("    created:", node);
 		return node
 	},
 	createDevice: function(parent, name, input, output) {
+console.log("createDevice:", parent, name, input, output);
 		var path = PATH.join2(typeof parent === "string" ? parent : FS.getPath(parent), name);
 		var mode = FS.getMode(!!input, !!output);
 		if (!FS.createDevice.major) FS.createDevice.major = 64;
@@ -3921,9 +3928,11 @@ var FS = {
 				return i
 			}
 		});
+console.log("   created:",path, mode, dev);
 		return FS.mkdev(path, mode, dev)
 	},
 	forceLoadFile: function(obj) {
+console.log("forceLoadFile:",obj);
 		if (obj.isDevice || obj.isFolder || obj.link || obj.contents) return true;
 		var success = true;
 		if (typeof XMLHttpRequest !== "undefined") {
