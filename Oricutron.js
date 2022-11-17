@@ -32,6 +32,7 @@ console.log("REMOTE_PACKAGE_SIZE=",REMOTE_PACKAGE_SIZE);
 console.log("PACKAGE_UUID=",PACKAGE_UUID);
 
 		function fetchRemotePackage(packageName, packageSize, callback, errback) {
+console.log("fetchRemotePackage(packageName, packageSize, callback, errback)",packageName, packageSize, callback, errback);
 			var xhr = new XMLHttpRequest;
 			xhr.open("GET", packageName, true);
 			xhr.responseType = "arraybuffer";
