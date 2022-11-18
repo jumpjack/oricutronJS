@@ -15,11 +15,55 @@
 	<a href="https://torguet.net/oric/oricutron.html">thehobbit.tap</a><br>
 <br>
 </div>
+
+	<input type="file" id="inpFile" width="100"><br>
+	Status: <span id="status" name="status">-</span>
+	<button id="btnSave" name="btnSave" onclick="saveFile(rawFileContents, myName)")>Save...</button><br>
+	<br>
+	See console for output.
+
+	<script>
+
+	var myName;
+	var fileContentsUInt8;
+
+	function loadFile(fileHandler) {
+		// The file is read as ArrayBuffer to keep contents raw, without interpretations from Javascript engine
+		// The raw array can then be converted to array of bytes (8 bit) (signed or unsigned) or of integers (16 bit).
+		// If interpreted as a string of characters, the raw array will be automatically converted by javascript using UTF16 encoder.
+		// If you need UTF-8 encoding, you must	use TextDecoder("utf8").
+		// Supported encodings: https://developer.mozilla.org/en-US/docs/Web/API/Encoding_API/Encodings
+
+		console.log("File to open:" ,fileHandler);
+		myName = fileHandler.name;
+		const reader = new FileReader();
+		reader.addEventListener('load', (event) => {
+				rawFileContents = event.target.result;
+				console.log("Loaded: ", event, rawFileContents.length);
+				fileContentsUInt8 = new Uint8Array(rawFileContents); // Extract from the generic ArrayBuffer an array of Unsigned Integers (0..255)
+				console.log(fileContentsUInt8);
+				document.getElementById("status").innerHTML = "File loaded. Click to save:";
+                scrivi("/readwritefs","FILE_DATA","FILE_DATA",21,fileContentsUInt8, myName)
+		});
+		reader.readAsArrayBuffer(fileHandler); // Read as arrayBuffer as "readAsBinaryString" is deprecated but we don't want Javascript to interpret the file at its own wish...
+		console.log("Reading process initiated...");
+	}
+
+
+
+	</script>
+
+
+
+
+
+
 <script>
     // this lists dsk and tap files available in same folder of this file:
-    var dskFiles = ["space1999-fr.dsk","space1999-en.dsk","https://raw.githubusercontent.com/jumpjack/oricutronJS/main/space1999-en.dsk","https://torguet.net/oric/space1999-fr.dsk","https://jumpjack.github.io/oricutronJS/space1999-en.dsk","pippo.dsk", ""];
+    var dskFiles = ["space1999-fr.dsk","space1999-en.dsk"];
     var tapFiles = [];
 </script>
+
 <script>
     function createLink(file) {
         var newLink = document.createElement('a');
@@ -45,6 +89,105 @@
         tapDiv.appendChild(newLink);
         tapDiv.appendChild(document.createElement('br'));
     }
+
+
+
+const fileSelector = document.getElementById('inpFile');
+fileSelector.addEventListener('change', (event) => loadFile(event.target.files[0]));
+console.log("Ready.");
+document.getElementById("status").innerHTML = "READY.";
+
+var db, mydb, objectStore;
+const dbName = "the_name";
+
+
+function leggi(dbName, name2, name3,dbVer) {
+	let openRequest = indexedDB.open(dbName, dbVer);
+
+	openRequest.onupgradeneeded = function() {
+	  // triggers if the client had no database
+	  // ...perform initialization...
+	};
+
+	openRequest.onerror = function() {
+	  console.error("Error", openRequest.error);
+	};
+
+	openRequest.onsuccess = function() {
+	  db = openRequest.result;
+	  transaction = db.transaction(name2, "readwrite");
+	  transaction.oncomplete = function () {
+	console.log("result:");
+		lista.result.forEach((f) => {
+			console.log(f);
+		});
+	  }
+
+	console.log("tr", transaction);
+	  filenames = transaction.objectStore(name3);
+	console.log("filenames",  filenames);
+	  lista=filenames.getAll();
+	console.log("lista",  lista);
+
+	};
+}
+
+
+
+function scrivi(dbName, name2, name3,dbVer, filecontents, filename) {
+	let openRequest = indexedDB.open(dbName, dbVer);
+
+	openRequest.onupgradeneeded = function() {
+console.log("Upgrade!");
+	  // triggers if the client had no database
+	  // ...perform initialization...
+	};
+
+	openRequest.onerror = function() {
+	  console.error("Error while writing", openRequest.error);
+	};
+
+	openRequest.onsuccess = function() {
+		db = openRequest.result;
+console.log("DB=",db);
+		transaction = db.transaction(name2, "readwrite");
+console.log("transaction=",transaction);
+
+			fileObjects = transaction.objectStore(name3);
+
+			let fileobject = {
+				contents: filecontents,
+				mode: 33206,
+				timestamp: new Date()
+			};
+
+			let writeRequest = fileObjects.add(fileobject, filename);
+
+			console.log("writeRequest",writeRequest);
+
+			writeRequest.onsuccess = function() { 
+			console.log("File added", writeRequest.result);
+			};
+
+			writeRequest.onerror = function() {
+			console.log("Error adding file", writeRequest.error);
+			};
+
+
+		transaction.oncomplete = function () {
+			console.log("result:");
+			lista.result.forEach((f) => {
+				console.log(f);
+			});
+
+		}
+	}
+
+};
+
+
+
+
 </script>
 </body>
 </html>
