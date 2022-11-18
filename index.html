@@ -4,7 +4,19 @@
 </head>
 <body>
 <h1>Oricutron.js Launcher</h1>
-<p>Please click on one of those links:</p>
+
+<br>
+<a href="oricutron.html">Start emulator loading latest used disk</a><br>
+<br>
+or load a local file:<br>
+<br>
+	<input type="file" id="inpFile" width="100"><br>
+	Status: <span id="status" name="status">-</span>
+	<br>
+	<br>
+	(See console for output)<br>
+
+<p>Available disks and tapes:</p>
 <h2>Disks:</h2>
 <div id="dskList">
 
@@ -15,14 +27,8 @@
 	
 <br>
 </div>
-<br>
-<a href="oricutron.html">Start emulator without disk</a><br>
-<br>
-	<input type="file" id="inpFile" width="100"><br>
-	Status: <span id="status" name="status">-</span>
-	<button id="btnSave" name="btnSave" onclick="saveFile(rawFileContents, myName)")>Save...</button><br>
-	<br>
-	See console for output.
+
+
 
 	<script>
 
@@ -45,7 +51,7 @@
 				fileContentsUInt8 = new Uint8Array(rawFileContents); // Extract from the generic ArrayBuffer an array of Unsigned Integers (0..255)
 				console.log(fileContentsUInt8);
 				document.getElementById("status").innerHTML = "File loaded. Click to save:";
-                scrivi("/readwritefs","FILE_DATA","FILE_DATA",21,fileContentsUInt8, myName)
+                writeToEmulatorFileSystem("/readwritefs","FILE_DATA","FILE_DATA",21,fileContentsUInt8, myName)
 		});
 		reader.readAsArrayBuffer(fileHandler); // Read as arrayBuffer as "readAsBinaryString" is deprecated but we don't want Javascript to interpret the file at its own wish...
 		console.log("Reading process initiated...");
@@ -62,11 +68,16 @@
 
 <script>
     // this lists dsk and tap files available in same folder of this file:
-    var dskFiles = ["space1999-fr.dsk","space1999-en.dsk"];
+    var dskFiles = [];
     var tapFiles = [];
 </script>
 
 <script>
+
+/////// This section allows loading of files stored in same folder of oricutron.html , on the server. //////////
+// To pass a filename to the emulator, store its name in localstorage, and emulator will
+// automatically retrieve the file from the server folder; use  sessionStorage.file = file to store the name of the file.
+
     function createLink(file) {
         var newLink = document.createElement('a');
         newLink.setAttribute('href','oricutron.html');
@@ -91,17 +102,17 @@
         tapDiv.appendChild(newLink);
         tapDiv.appendChild(document.createElement('br'));
     }
+////////////////////
 
 
-
+///// This section allows loading files from local hard disk, on client: ///////////
 const fileSelector = document.getElementById('inpFile');
 fileSelector.addEventListener('change', (event) => loadFile(event.target.files[0]));
 console.log("Ready.");
 document.getElementById("status").innerHTML = "READY.";
+//////////////
 
 var db, mydb, objectStore;
-const dbName = "the_name";
-
 
 function leggi(dbName, name2, name3,dbVer) {
 	let openRequest = indexedDB.open(dbName, dbVer);
@@ -136,11 +147,10 @@ function leggi(dbName, name2, name3,dbVer) {
 
 
 
-function scrivi(dbName, name2, name3,dbVer, filecontents, filename) {
+function writeToEmulatorFileSystem(dbName, name2, name3,dbVer, filecontents, filename) {
 	let openRequest = indexedDB.open(dbName, dbVer);
 
 	openRequest.onupgradeneeded = function() {
-console.log("Upgrade!");
 	  // triggers if the client had no database
 	  // ...perform initialization...
 	};
@@ -151,42 +161,37 @@ console.log("Upgrade!");
 
 	openRequest.onsuccess = function() {
 		db = openRequest.result;
-console.log("DB=",db);
 		transaction = db.transaction(name2, "readwrite");
-console.log("transaction=",transaction);
+		fileObjects = transaction.objectStore(name3);
 
-			fileObjects = transaction.objectStore(name3);
+		let fileobject = {
+			contents: filecontents,
+			mode: 33206,
+			timestamp: new Date()
+		};
 
-			let fileobject = {
-				contents: filecontents,
-				mode: 33206,
-				timestamp: new Date()
-			};
+		let writeRequest = fileObjects.add(fileobject, "/readwritefs/" + filename);
 
-			let writeRequest = fileObjects.add(fileobject, "/readwritefs/" + filename);
+		console.log("writeRequest",writeRequest);
 
-			console.log("writeRequest",writeRequest);
-
-			writeRequest.onsuccess = function() { 
+		writeRequest.onsuccess = function() {
 			console.log("File added", writeRequest.result);
-
-            fileObjects = transaction.objectStore(name3);
+	        fileObjects = transaction.objectStore(name3);
 			console.log("filenames",  fileObjects);
 			lista=fileObjects.getAll();
-			console.log("lista",  lista);
-			};
+			console.log("list:",  lista);
+		};
 
-			writeRequest.onerror = function() {
-			console.log("Error adding file", writeRequest.error);
-			};
+		writeRequest.onerror = function() {
+		console.log("Error adding file", writeRequest.error);
+		};
 
 
 		transaction.oncomplete = function () {
-			console.log("result:");
+			console.log("Final list:");
 			lista.result.forEach((f) => {
 				console.log(f);
 			});
-
 		}
 	}
 
