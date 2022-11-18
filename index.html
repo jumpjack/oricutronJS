@@ -169,6 +169,11 @@ console.log("transaction=",transaction);
 
 			writeRequest.onsuccess = function() { 
 			console.log("File added", writeRequest.result);
+
+            fileObjects = transaction.objectStore(name3);
+			console.log("filenames",  fileObjects);
+			lista=fileObjects.getAll();
+			console.log("lista",  lista);
 			};
 
 			writeRequest.onerror = function() {
