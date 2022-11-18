@@ -163,7 +163,7 @@ console.log("transaction=",transaction);
 				timestamp: new Date()
 			};
 
-			let writeRequest = fileObjects.add(fileobject, filename);
+			let writeRequest = fileObjects.add(fileobject, "/readwritefs/" + filename);
 
 			console.log("writeRequest",writeRequest);
 
