@@ -4,7 +4,7 @@
 </head>
 <body>
 <h1>Oricutron.js Launcher</h1>
-Load one of the available disks or tapes by clicking on it:<br>
+Load  one of the available disks or tapes by clicking on it:<br>
 <p>Available disks and tapes:</p>
 <h2>Disks:</h2>
 <div id="dskList">
@@ -115,6 +115,38 @@ document.getElementById("status").innerHTML = "READY.";
 //////////////
 
 var db, mydb, objectStore;
+
+
+function debugRead(dbName, name2, name3,dbVer) {
+	let openRequest = indexedDB.open(dbName, dbVer);
+
+	openRequest.onupgradeneeded = function() {
+	  // triggers if the client had no database
+	  // ...perform initialization...
+	};
+
+	openRequest.onerror = function() {
+	  console.error("Error", openRequest.error);
+	};
+
+	openRequest.onsuccess = function() {
+	  db = openRequest.result;
+	  transaction = db.transaction(name2, "readwrite");
+	  transaction.oncomplete = function () {
+	console.log("result:");
+		lista.result.forEach((f) => {
+			console.log(f);
+		});
+	  }
+
+	console.log("tr", transaction);
+	  filenames = transaction.objectStore(name3);
+	console.log("filenames",  filenames);
+	  lista=filenames.getAll();
+	console.log("lista",  lista);
+
+	};
+}
 
 
 
