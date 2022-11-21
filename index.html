@@ -4,9 +4,22 @@
 </head>
 <body>
 <h1>Oricutron.js Launcher</h1>
+Load one of the available disks or tapes by clicking on it:<br>
+<p>Available disks and tapes:</p>
+<h2>Disks:</h2>
+<div id="dskList">
 
 <br>
-<a href="oricutron.html">Start emulator loading latest used disk</a><br>
+</div>
+<h2>Tapes:</h2>
+<div id="tapList">
+
+<br>
+</div>
+<br>
+or
+<br>
+<a href="oricutron.html">start emulator loading latest used disk</a><br>
 <br>
 or load a local file:<br>
 <br>
@@ -16,17 +29,6 @@ or load a local file:<br>
 	<br>
 	(See console for output)<br>
 
-<p>Available disks and tapes:</p>
-<h2>Disks:</h2>
-<div id="dskList">
-
-<br>
-</div>
-<h2>Tapes:</h2>
-<div id="tapList">
-	
-<br>
-</div>
 
 
 
@@ -68,7 +70,7 @@ or load a local file:<br>
 
 <script>
     // this lists dsk and tap files available in same folder of this file:
-    var dskFiles = [];
+    var dskFiles = ["space1999-en.dsk"];
     var tapFiles = [];
 </script>
 
@@ -114,37 +116,6 @@ document.getElementById("status").innerHTML = "READY.";
 
 var db, mydb, objectStore;
 
-function leggi(dbName, name2, name3,dbVer) {
-	let openRequest = indexedDB.open(dbName, dbVer);
-
-	openRequest.onupgradeneeded = function() {
-	  // triggers if the client had no database
-	  // ...perform initialization...
-	};
-
-	openRequest.onerror = function() {
-	  console.error("Error", openRequest.error);
-	};
-
-	openRequest.onsuccess = function() {
-	  db = openRequest.result;
-	  transaction = db.transaction(name2, "readwrite");
-	  transaction.oncomplete = function () {
-	console.log("result:");
-		lista.result.forEach((f) => {
-			console.log(f);
-		});
-	  }
-
-	console.log("tr", transaction);
-	  filenames = transaction.objectStore(name3);
-	console.log("filenames",  filenames);
-	  lista=filenames.getAll();
-	console.log("lista",  lista);
-
-	};
-}
-
 
 
 function writeToEmulatorFileSystem(dbName, name2, name3,dbVer, filecontents, filename) {
@@ -170,7 +141,8 @@ function writeToEmulatorFileSystem(dbName, name2, name3,dbVer, filecontents, fil
 			timestamp: new Date()
 		};
 
-		let writeRequest = fileObjects.add(fileobject, "/readwritefs/" + filename);
+		sessionStorage.file = filename; // Filename is read by emulator from browser's sessionStorage
+		let writeRequest = fileObjects.add(fileobject, "/readwritefs/" + filename); // File contents are read by emulator from browser's IndexedDB
 
 		console.log("writeRequest",writeRequest);
 
@@ -178,8 +150,8 @@ function writeToEmulatorFileSystem(dbName, name2, name3,dbVer, filecontents, fil
 			console.log("File added", writeRequest.result);
 	        fileObjects = transaction.objectStore(name3);
 			console.log("filenames",  fileObjects);
-			lista=fileObjects.getAll();
-			console.log("list:",  lista);
+			filesList = fileObjects.getAll();
+			console.log("list:",  filesList);
 		};
 
 		writeRequest.onerror = function() {
@@ -189,8 +161,8 @@ function writeToEmulatorFileSystem(dbName, name2, name3,dbVer, filecontents, fil
 
 		transaction.oncomplete = function () {
 			console.log("Final list:");
-			lista.result.forEach((f) => {
-				console.log(f);
+			filesList.result.forEach((f) => {
+				console.log("File: ", f);
 			});
 		}
 	}
