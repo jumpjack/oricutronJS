@@ -4,34 +4,35 @@
 </head>
 <body>
 <h1>Oricutron.js Launcher</h1>
-Load  one of the available disks or tapes by clicking on it:<br>
-<p>Available disks and tapes:</p>
-<h2>Disks:</h2>
+<b>Start emulator loading one of the available disks or tapes by clicking on it:</b><br>
+<br>
+<b>Disks:</b>
 <div id="dskList">
-
-<br>
 </div>
-<h2>Tapes:</h2>
+<br>
+<br>
+<b>Tapes:</b>
 <div id="tapList">
-
 <br>
 </div>
 <br>
-or
+or<br>
 <br>
-<a href="oricutron.html">start emulator loading latest used disk</a><br>
-<br>
-or load a local file:<br>
+<b>Load a local file</b>:<br>
 <br>
 	<input type="file" id="inpFile" width="100"><br>
-	Status: <span id="status" name="status">-</span>
-	<br>
-	<br>
-	(See console for output)<br>
+	Status: <span id="status" name="status">(waiting user seleection)</span><a href="oricutron.html" id="startlink" name="startlink" hidden>START</a><br>
+<br>
+or<br>
+<br>
+<a href="oricutron.html"><b>Start emulator loading latest used disk</a></b>: <span id="lastdisk" name="lastdisk">none</span><br>
+<br>
 
-
-
-
+<hr>
+Source code: <a href="https://github.com/jumpjack/oricutronJS">link</a><br>
+Forked from: <a href="https://github.com/pete-gordon/oricutron/tree/www/www">link</a><br>
+You can discuss about this page <a href="https://github.com/jumpjack/oricutronJS/discussions">here</a> or notify bugs <b> of this page</b> <a href="https://github.com/jumpjack/oricutronJS/issues">here</a>, but please consider I am NOT the author of the
+emulator, but just of this page; to notify <b>bugs of the emulator</b> please post <a href="https://github.com/pete-gordon/oricutron/issues">here.</a><br>
 	<script>
 
 	var myName;
@@ -52,8 +53,10 @@ or load a local file:<br>
 				console.log("Loaded: ", event, rawFileContents.length);
 				fileContentsUInt8 = new Uint8Array(rawFileContents); // Extract from the generic ArrayBuffer an array of Unsigned Integers (0..255)
 				console.log(fileContentsUInt8);
-				document.getElementById("status").innerHTML = "File loaded. Click to save:";
-                writeToEmulatorFileSystem("/readwritefs","FILE_DATA","FILE_DATA",21,fileContentsUInt8, myName)
+				document.getElementById("status").innerHTML = "File loaded. Click link to start emulator: ";
+                document.getElementById("startlink").removeAttribute("hidden");
+                document.getElementById("lastdisk").innerHTML=myName;
+                writeToEmulatorFileSystem("/readwritefs","FILE_DATA", 21,fileContentsUInt8, myName)
 		});
 		reader.readAsArrayBuffer(fileHandler); // Read as arrayBuffer as "readAsBinaryString" is deprecated but we don't want Javascript to interpret the file at its own wish...
 		console.log("Reading process initiated...");
@@ -112,6 +115,7 @@ const fileSelector = document.getElementById('inpFile');
 fileSelector.addEventListener('change', (event) => loadFile(event.target.files[0]));
 console.log("Ready.");
 document.getElementById("status").innerHTML = "READY.";
+document.getElementById("lastdisk").innerHTML = sessionStorage.file
 //////////////
 
 var db, mydb, objectStore;
@@ -150,7 +154,8 @@ function debugRead(dbName, name2, name3,dbVer) {
 
 
 
-function writeToEmulatorFileSystem(dbName, name2, name3,dbVer, filecontents, filename) {
+function writeToEmulatorFileSystem(dbName, tableName, dbVer, filecontents, filename) {
+	console.log("Opening db ", dbName , " to add record '" ,filename , " in ", tableName);
 	let openRequest = indexedDB.open(dbName, dbVer);
 
 	openRequest.onupgradeneeded = function() {
@@ -159,13 +164,13 @@ function writeToEmulatorFileSystem(dbName, name2, name3,dbVer, filecontents, fil
 	};
 
 	openRequest.onerror = function() {
-	  console.error("Error while writing", openRequest.error);
+	  console.error("Error while writing file ",filename,  openRequest.error);
 	};
 
 	openRequest.onsuccess = function() {
 		db = openRequest.result;
-		transaction = db.transaction(name2, "readwrite");
-		fileObjects = transaction.objectStore(name3);
+		transaction = db.transaction(tableName, "readwrite");
+		fileObjects = transaction.objectStore(tableName);
 
 		let fileobject = {
 			contents: filecontents,
@@ -180,7 +185,7 @@ function writeToEmulatorFileSystem(dbName, name2, name3,dbVer, filecontents, fil
 
 		writeRequest.onsuccess = function() {
 			console.log("File added", writeRequest.result);
-	        fileObjects = transaction.objectStore(name3);
+	        fileObjects = transaction.objectStore(tableName);
 			console.log("filenames",  fileObjects);
 			filesList = fileObjects.getAll();
 			console.log("list:",  filesList);

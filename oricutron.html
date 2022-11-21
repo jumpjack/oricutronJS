@@ -131,12 +131,10 @@
 </head>
 <body>
 <div>
-The emulator automatically loads an image when a link to page oricutron.html is clicked; for example, following link will
-launch emulator loading file space1999-fr.dsk, if such file is present in same folder of oricutron.html:<br>
-<a href="oricutron.html">space1999-fr.dsk</a><br>
+To load a different disk in the emulator, please <a href="index.html">go back to the emulator launcher page</a>.<br>
 <br>
-The Disks and Tapes files are in the /readwritefs/ directory of the emulator environment, which is filled with .dsk and .tap files
-which are in the same folder of oricutron.html;  you may need to go up twice in the directory structure of Oric filesystem to find this directory.<br>
+The Disks and Tapes files are in the /readwritefs/ directory **of the emulator environment**;  you may need to go up twice in the directory structure of
+Oric filesystem to find **readwritefs** directory.<br>
     Remember to save snapshots, tapes and dsk in this directory as it is the only one
     that is saved in your browser's storage space. <br>
     <br>
@@ -203,6 +201,7 @@ Module.setStatus("Downloading..."), window.onerror = function (e) {
 
 <script>
     Module.preRun.push(function () {
+console.log("sessionStorage.file=",sessionStorage.file);
         ENV.FILE = sessionStorage.file
     });
 </script>
@@ -255,7 +254,7 @@ Module.setStatus("Downloading..."), window.onerror = function (e) {
     function getFileList() {
         var node = FS.readdir('/readwritefs/');
 
-        console.log(node);
+        console.log("node=",node);
 
         var fileList = document.getElementById('fileList');
         node.forEach(function (file) {

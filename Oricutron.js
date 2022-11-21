@@ -5,8 +5,6 @@ if (!Module.expectedDataFileDownloads) {
 Module.expectedDataFileDownloads++;
 (function() {
 	var loadPackage = function(metadata) {
-console.log("metadata=",metadata);
-console.log("typeof window=",typeof window);
 		var PACKAGE_PATH;
 		if (typeof window === "object") {
 			PACKAGE_PATH = window["encodeURIComponent"](window.location.pathname.toString().substring(0, window.location.pathname.toString().lastIndexOf("/")) + "/")
@@ -15,7 +13,6 @@ console.log("typeof window=",typeof window);
 		} else {
 			throw "using preloaded data can only be done on a web page or in a web worker"
 		}
-console.log("PACKAGE_PATH=",PACKAGE_PATH);
 
 		var PACKAGE_NAME = "Oricutron.data";
 		var REMOTE_PACKAGE_BASE = "Oricutron.data";
@@ -27,12 +24,8 @@ console.log("PACKAGE_PATH=",PACKAGE_PATH);
 		var REMOTE_PACKAGE_NAME = Module["locateFile"] ? Module["locateFile"](REMOTE_PACKAGE_BASE, "") : REMOTE_PACKAGE_BASE;
 		var REMOTE_PACKAGE_SIZE = metadata["remote_package_size"];
 		var PACKAGE_UUID = metadata["package_uuid"];
-console.log("REMOTE_PACKAGE_NAME=",REMOTE_PACKAGE_NAME);
-console.log("REMOTE_PACKAGE_SIZE=",REMOTE_PACKAGE_SIZE);
-console.log("PACKAGE_UUID=",PACKAGE_UUID);
 
 		function fetchRemotePackage(packageName, packageSize, callback, errback) {
-console.log("fetchRemotePackage(packageName, packageSize, callback, errback)",packageName, packageSize);
 			var xhr = new XMLHttpRequest;
 			xhr.open("GET", packageName, true);
 			xhr.responseType = "arraybuffer";
@@ -87,7 +80,6 @@ console.log("fetchRemotePackage(packageName, packageSize, callback, errback)",pa
 
 		var fetchedCallback = null;
 		var fetched = Module["getPreloadedPackage"] ? Module["getPreloadedPackage"](REMOTE_PACKAGE_NAME, REMOTE_PACKAGE_SIZE) : null;
-console.log("fetched=",fetched);
 		if (!fetched) fetchRemotePackage(REMOTE_PACKAGE_NAME, REMOTE_PACKAGE_SIZE, function(data) {
 			if (fetchedCallback) {
 				fetchedCallback(data);
@@ -96,7 +88,6 @@ console.log("fetched=",fetched);
 				fetched = data
 			}
 		}, handleError);
-console.log("fetchedCallback=",fetchedCallback);
 
 		function runWithFS() {
 			function assert(check, msg) {
@@ -116,7 +107,6 @@ console.log("fetchedCallback=",fetchedCallback);
 			DataRequest.prototype = {
 				requests: {},
 				open: function(mode, name) {
-console.log("DataRequest,name:",this, name);
 					this.name = name;
 					this.requests[name] = this;
 					Module["addRunDependency"]("fp " + this.name)
@@ -128,26 +118,22 @@ console.log("DataRequest,name:",this, name);
 				},
 				finish: function(byteArray) {
 					var that = this;
-console.log("DataRequest,FS_createDataFile name:",this.name);
 					Module["FS_createDataFile"](this.name, null, byteArray, true, true, true);
 					Module["removeRunDependency"]("fp " + that.name);
 					this.requests[this.name] = null
 				}
 			};
 			var files = metadata["files"];
-console.log("DataRequest,FS_createDataFile files:",metadata["files"]);
 			for (var i = 0; i < files.length; ++i) {
 				new DataRequest(files[i]["start"], files[i]["end"], files[i]["audio"]).open("GET", files[i]["filename"])
 			}
 
 			function processPackageData(arrayBuffer) {
-console.log("processPackageData=",arrayBuffer);
 				assert(arrayBuffer, "Loading data file failed.");
 				assert(arrayBuffer instanceof ArrayBuffer, "bad input to processPackageData");
 				var byteArray = new Uint8Array(arrayBuffer);
 				DataRequest.prototype.byteArray = byteArray;
 				var files = metadata["files"];
-console.log("processPackageData files=",files);
 				for (var i = 0; i < files.length; ++i) {
 					DataRequest.prototype.requests[files[i].filename].onload()
 				}
@@ -167,10 +153,8 @@ console.log("processPackageData files=",files);
 		}
 
 		if (Module["calledRun"]) {
-console.log("Run with FS");
 			runWithFS()
 		} else {
-console.log("NOT run with FS");
 			if (!Module["preRun"]) Module["preRun"] = [];
 			Module["preRun"].push(runWithFS)
 		}
@@ -431,7 +415,6 @@ console.log("NOT run with FS");
 
 var moduleOverrides = {};
 var key;
-console.log("Module",Module);
 for (key in Module) {
 	if (Module.hasOwnProperty(key)) {
 		moduleOverrides[key] = Module[key]
@@ -454,13 +437,10 @@ ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIRONME
 var scriptDirectory = "";
 
 function locateFile(path) {
-console.log("Locating path,scriptDirectory... ",path, scriptDirectory)
 	if (Module["locateFile"]) {
 		var dummy =  Module["locateFile"](path, scriptDirectory);
-console.log("Located:  Module['locateFile'](path, scriptDirectory)=",dummy)
 		return dummy
 	}
-console.log("Not located: scriptDirectory + path=",scriptDirectory + path)
 	return scriptDirectory + path
 }
 
@@ -469,16 +449,12 @@ var read_, readAsync, readBinary, setWindowTitle;
 var nodeFS;
 var nodePath;
 if (ENVIRONMENT_IS_NODE) {
-console.log("ENVIRONMENT_IS_NODE");
 	if (ENVIRONMENT_IS_WORKER) {
-console.log("    ENVIRONMENT_IS_WORKER");
 		scriptDirectory = require("path").dirname(scriptDirectory) + "/"
 	} else {
-console.log("    ENVIRONMENT is NOT WORKER");
 		scriptDirectory = __dirname + "/"
 	}
 	read_ = function shell_read(filename, binary) {
-console.log("shell_read filename, binary", filename, binary);
 		if (!nodeFS) nodeFS = require("fs");
 		if (!nodePath) nodePath = require("path");
 		filename = nodePath["normalize"](filename);
@@ -512,22 +488,18 @@ console.log("shell_read filename, binary", filename, binary);
 		return "[Emscripten Module object]"
 	}
 } else if (ENVIRONMENT_IS_SHELL) {
-console.log("ENVIRONMENT_IS_SHELL");
 	if (typeof read != "undefined") {
 		read_ = function shell_read(f) {
-console.log("shell_read(f)",f);
 			return read(f)
 		}
 	}
 	readBinary = function readBinary(f) {
-console.log("readBinary(f)",f);
 		var data;
 		if (typeof readbuffer === "function") {
 			return new Uint8Array(readbuffer(f))
 		}
 		data = read(f, "binary");
 		assert(typeof data === "object");
-console.log("data=",data);
 		return data
 	};
 	if (typeof scriptArgs != "undefined") {
@@ -535,7 +507,6 @@ console.log("data=",data);
 	} else if (typeof arguments != "undefined") {
 		arguments_ = arguments
 	}
-console.log("arguments_=",arguments_);
 
 	if (typeof quit === "function") {
 		quit_ = function(status) {
@@ -548,12 +519,9 @@ console.log("arguments_=",arguments_);
 		console.warn = console.error = typeof printErr !== "undefined" ? printErr : print
 	}
 } else if (ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER) {
-console.log("ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER");
 	if (ENVIRONMENT_IS_WORKER) {
-console.log("    ENVIRONMENT_IS_WORKER");
 		scriptDirectory = self.location.href
 	} else if (typeof document !== "undefined" && document.currentScript) {
-console.log("    ENVIRONMENT_IS_WEB");
 		scriptDirectory = document.currentScript.src
 	}
 
@@ -564,7 +532,6 @@ console.log("    ENVIRONMENT_IS_WEB");
 	} {
 		read_ = function shell_read(url) {
 			var xhr = new XMLHttpRequest;
-console.log("Retrieving in shell_read:", url);
 			xhr.open("GET", url, false);
 			xhr.send(null);
 			return xhr.responseText
@@ -572,7 +539,6 @@ console.log("Retrieving in shell_read:", url);
 		if (ENVIRONMENT_IS_WORKER) {
 			readBinary = function readBinary(url) {
 				var xhr = new XMLHttpRequest;
-console.log("ENVIRONMENT_IS_WORKER - Retrieving in readBinary:", url);
 				xhr.open("GET", url, false);
 				xhr.responseType = "arraybuffer";
 				xhr.send(null);
@@ -581,7 +547,6 @@ console.log("ENVIRONMENT_IS_WORKER - Retrieving in readBinary:", url);
 		}
 		readAsync = function readAsync(url, onload, onerror) {
 			var xhr = new XMLHttpRequest;
-console.log("Retrieving in readAsync:", url);
 			xhr.open("GET", url, true);
 			xhr.responseType = "arraybuffer";
 			xhr.onload = function xhr_onload() {
@@ -596,7 +561,6 @@ console.log("Retrieving in readAsync:", url);
 		}
 	}
 	setWindowTitle = function(title) {
-console.log("title",title);
 		document.title = title
 	}
 } else {}
@@ -613,11 +577,6 @@ if (Module["arguments"]) arguments_ = Module["arguments"];
 if (Module["thisProgram"]) thisProgram = Module["thisProgram"];
 if (Module["quit"]) quit_ = Module["quit"];
 var STACK_ALIGN = 16;
-
-
-console.log("arguments=",arguments_);
-console.log("thisProgram=",thisProgram);
-console.log("quit=",quit_);
 
 function alignMemory(size, factor) {
 	if (!factor) factor = STACK_ALIGN;
@@ -1164,18 +1123,14 @@ WasmOffsetConverter.prototype.getName = function(offset) {
 };
 
 function createWasm() {
-console.log("Creating WASM...");
 	var info = {
 		"a": asmLibraryArg
 	};
-console.log("createWasm, info (cercare ha e pa):",info);
 	function receiveInstance(instance, module) {
 		var exports = instance.exports;
 		exports = Asyncify.instrumentWasmExports(exports);
-console.log("   exports:",exports);
 		Module["asm"] = exports;
 		wasmTable = Module["asm"]["Kd"];
-console.log("   mio test:",Module["asm"]["pa"], info.a["pa"], Module, info);
 		removeRunDependency("wasm-instantiate")
 	}
 	addRunDependency("wasm-instantiate");
@@ -1187,10 +1142,8 @@ console.log("   mio test:",Module["asm"]["pa"], info.a["pa"], Module, info);
 
 	function instantiateArrayBuffer(receiver) {
 		return getBinaryPromise().then(function(binary) {
-console.log("createWasm instantiateArrayBuffer - receiver, binary, info:", receiver, binary, info);
 			var result = WebAssembly.instantiate(binary, info);
 			result.then(function(instance) {
-console.log("   result:", result);
 				wasmOffsetConverter = new WasmOffsetConverter(binary, instance.module);
 				removeRunDependency("offset-converter")
 			});
@@ -1206,9 +1159,7 @@ console.log("   result:", result);
 			return fetch(wasmBinaryFile, {
 				credentials: "same-origin"
 			}).then(function(response) {
-console.log("instantiateAsync wasmBinary response:",response);
 				var result = WebAssembly.instantiateStreaming(response, info);
-console.log("instantiateAsync wasmBinary result:", result);
 				Promise.all([response.clone().arrayBuffer(), result]).then(function(results) {
 					wasmOffsetConverter = new WasmOffsetConverter(new Uint8Array(results[0]), results[1].module);
 					removeRunDependency("offset-converter")
@@ -1229,7 +1180,6 @@ console.log("instantiateAsync wasmBinary result:", result);
 		try {
 			var exports = Module["instantiateWasm"](info, receiveInstance);
 			exports = Asyncify.instrumentWasmExports(exports);
-console.log("instantiateWasm exports:",exports);
 			return exports
 		} catch (e) {
 			err("Module.instantiateWasm callback failed with error: " + e);
@@ -2190,7 +2140,6 @@ var MEMFS = {
 	},
 	stream_ops: {
 		read: function(stream, buffer, offset, length, position) {
-console.log("stream_ops read stream:", stream.path);
 			var contents = stream.node.contents;
 			if (position >= stream.node.usedBytes) return 0;
 			var size = Math.min(stream.node.usedBytes - position, length);
@@ -2202,7 +2151,6 @@ console.log("stream_ops read stream:", stream.path);
 			return size
 		},
 		write: function(stream, buffer, offset, length, position, canOwn) {
-console.log("stream_ops write stream:", stream.path);
 			if (!length) return 0;
 			var node = stream.node;
 			node.timestamp = Date.now();
@@ -3849,7 +3797,6 @@ var FS = {
 		return ret
 	},
 	createPath: function(parent, path, canRead, canWrite) {
-console.log("CreatePath:", parent, path, canRead, canWrite);
 		parent = typeof parent === "string" ? parent : FS.getPath(parent);
 		var parts = path.split("/").reverse();
 		while (parts.length) {
@@ -3861,18 +3808,14 @@ console.log("CreatePath:", parent, path, canRead, canWrite);
 			} catch (e) {}
 			parent = current
 		}
-console.log("   created:", current);
 		return current
 	},
 	createFile: function(parent, name, properties, canRead, canWrite) {
-console.log("createFile:", parent, name, properties, canRead, canWrite);
 		var path = PATH.join2(typeof parent === "string" ? parent : FS.getPath(parent), name);
 		var mode = FS.getMode(canRead, canWrite);
-console.log("  created:", path, mode);
 		return FS.create(path, mode)
 	},
 	createDataFile: function(parent, name, data, canRead, canWrite, canOwn) {
-//console.log("createDataFile:", parent, name, data, canRead, canWrite, canOwn);
 		var path = name ? PATH.join2(typeof parent === "string" ? parent : FS.getPath(parent), name) : parent;
 		var mode = FS.getMode(canRead, canWrite);
 		var node = FS.create(path, mode);
@@ -3888,11 +3831,9 @@ console.log("  created:", path, mode);
 			FS.close(stream);
 			FS.chmod(node, mode)
 		}
-//console.log("    created:", node);
 		return node
 	},
 	createDevice: function(parent, name, input, output) {
-console.log("createDevice:", parent, name, input, output);
 		var path = PATH.join2(typeof parent === "string" ? parent : FS.getPath(parent), name);
 		var mode = FS.getMode(!!input, !!output);
 		if (!FS.createDevice.major) FS.createDevice.major = 64;
@@ -3941,11 +3882,9 @@ console.log("createDevice:", parent, name, input, output);
 				return i
 			}
 		});
-console.log("   created:",path, mode, dev);
 		return FS.mkdev(path, mode, dev)
 	},
 	forceLoadFile: function(obj) {
-console.log("forceLoadFile:",obj);
 		if (obj.isDevice || obj.isFolder || obj.link || obj.contents) return true;
 		var success = true;
 		if (typeof XMLHttpRequest !== "undefined") {
@@ -4061,7 +4000,6 @@ console.log("forceLoadFile:",obj);
 			}
 		}
 		var node = FS.createFile(parent, name, properties, canRead, canWrite);
-console.log("node=", node);
 		if (properties.contents) {
 			node.contents = properties.contents
 		} else if (properties.url) {
@@ -4105,20 +4043,17 @@ console.log("node=", node);
 			return size
 		};
 		node.stream_ops = stream_ops;
-console.log("node=",node);
 		return node
 	},
 	createPreloadedFile: function(parent, name, url, canRead, canWrite, onload, onerror, dontCreateFile, canOwn, preFinish) {
 		Browser.init();
 		var fullname = name ? PATH_FS.resolve(PATH.join2(parent, name)) : parent;
 		var dep = getUniqueRunDependency("cp " + fullname);
-console.log("fullname=",fullname,dep);
 
 		function processData(byteArray) {
 			function finish(byteArray) {
 				if (preFinish) preFinish();
 				if (!dontCreateFile) {
-console.log("FS.createDataFile=",parent, name, byteArray, canRead, canWrite, canOwn);
 					FS.createDataFile(parent, name, byteArray, canRead, canWrite, canOwn)
 				}
 				if (onload) onload();
@@ -4127,7 +4062,6 @@ console.log("FS.createDataFile=",parent, name, byteArray, canRead, canWrite, can
 			var handled = false;
 			Module["preloadPlugins"].forEach(function(plugin) {
 				if (handled) return;
-console.log("canHandle=",fullname);
 				if (plugin["canHandle"](fullname)) {
 					plugin["handle"](byteArray, fullname, finish, function() {
 						if (onerror) onerror();
@@ -4144,7 +4078,6 @@ console.log("canHandle=",fullname);
 				processData(byteArray)
 			}, onerror)
 		} else {
-console.log("processData=",url);
 			processData(url)
 		}
 	},
@@ -4157,13 +4090,11 @@ console.log("processData=",url);
 	DB_VERSION: 20,
 	DB_STORE_NAME: "FILE_DATA",
 	saveFilesToDB: function(paths, onload, onerror) {
-console.log("saveFilesToDB=",paths, onload, onerror);
 		onload = onload || function() {};
 		onerror = onerror || function() {};
 		var indexedDB = FS.indexedDB();
 		try {
 			var openRequest = indexedDB.open(FS.DB_NAME(), FS.DB_VERSION)
-console.log("openRequest=",openRequest);
 		} catch (e) {
 			return onerror(e)
 		}
@@ -4171,13 +4102,11 @@ console.log("openRequest=",openRequest);
 			out("creating db");
 			var db = openRequest.result;
 			db.createObjectStore(FS.DB_STORE_NAME)
-console.log("db=",db);
 		};
 		openRequest.onsuccess = function openRequest_onsuccess() {
 			var db = openRequest.result;
 			var transaction = db.transaction([FS.DB_STORE_NAME], "readwrite");
 			var files = transaction.objectStore(FS.DB_STORE_NAME);
-console.log("openRequest.onsuccess=",db,transaction,files);
 			var ok = 0,
 				fail = 0,
 				total = paths.length;
@@ -4187,7 +4116,6 @@ console.log("openRequest.onsuccess=",db,transaction,files);
 				else onerror()
 			}
 			paths.forEach(function(path) {
-console.log("    path=",path);
 				var putRequest = files.put(FS.analyzePath(path).object.contents, path);
 				putRequest.onsuccess = function putRequest_onsuccess() {
 					ok++;
@@ -4203,7 +4131,6 @@ console.log("    path=",path);
 		openRequest.onerror = onerror
 	},
 	loadFilesFromDB: function(paths, onload, onerror) {
-console.log("loadFilesFromDB=",paths, onload, onerror);
 		onload = onload || function() {};
 		onerror = onerror || function() {};
 		var indexedDB = FS.indexedDB();
@@ -4215,7 +4142,6 @@ console.log("loadFilesFromDB=",paths, onload, onerror);
 		openRequest.onupgradeneeded = onerror;
 		openRequest.onsuccess = function openRequest_onsuccess() {
 			var db = openRequest.result;
-console.log("openRequest.onsuccess=",db);
 			try {
 				var transaction = db.transaction([FS.DB_STORE_NAME], "readonly")
 			} catch (e) {
@@ -4223,7 +4149,6 @@ console.log("openRequest.onsuccess=",db);
 				return
 			}
 			var files = transaction.objectStore(FS.DB_STORE_NAME);
-console.log("files=",files);
 			var ok = 0,
 				fail = 0,
 				total = paths.length;
@@ -4234,12 +4159,10 @@ console.log("files=",files);
 			}
 			paths.forEach(function(path) {
 				var getRequest = files.get(path);
-console.log("    getRequest",getRequest);
 				getRequest.onsuccess = function getRequest_onsuccess() {
 					if (FS.analyzePath(path).exists) {
 						FS.unlink(path)
 					}
-console.log("    FS.createDataFile",PATH.dirname(path), PATH.basename(path), getRequest.result);
 					FS.createDataFile(PATH.dirname(path), PATH.basename(path), getRequest.result, true, true, true);
 					ok++;
 					if (ok + fail == total) finish()
@@ -4270,7 +4193,6 @@ var SYSCALLS = {
 			}
 			path = PATH.join2(dir, path)
 		}
-console.log("path=",path);
 		return path
 	},
 	doStat: function(func, path, buf) {
@@ -4328,10 +4250,8 @@ console.log("path=",path);
 		return 0
 	},
 	doReadlink: function(path, buf, bufsize) {
-console.log("doReadlink=",path);
 		if (bufsize <= 0) return -28;
 		var ret = FS.readlink(path);
-console.log("   ret=",ret);
 		var len = Math.min(bufsize, lengthBytesUTF8(ret));
 		var endChar = HEAP8[buf + len];
 		stringToUTF8(ret, buf, bufsize + 1);
@@ -4339,7 +4259,6 @@ console.log("   ret=",ret);
 		return len
 	},
 	doAccess: function(path, amode) {
-console.log("   doAccess=",path);
 		if (amode & ~7) {
 			return -28
 		}
@@ -4361,13 +4280,11 @@ console.log("   doAccess=",path);
 		return 0
 	},
 	doDup: function(path, flags, suggestFD) {
-console.log("   doDup=",path);
 		var suggest = FS.getStream(suggestFD);
 		if (suggest) FS.close(suggest);
 		return FS.open(path, flags, 0, suggestFD, suggestFD).fd
 	},
 	doReadv: function(stream, iov, iovcnt, offset) {
-console.log("   doReadv=",stream.path);
 		var ret = 0;
 		for (var i = 0; i < iovcnt; i++) {
 			var ptr = HEAP32[iov + i * 8 >> 2];
@@ -4610,7 +4527,6 @@ function ___sys_open(path, flags, varargs) {
 }
 
 function ___sys_readlink(path, buf, bufsize) {
-console.log("___sys_readlink=",path);
 	try {
 		path = SYSCALLS.getStr(path);
 		return SYSCALLS.doReadlink(path, buf, bufsize)
@@ -8726,7 +8642,6 @@ function _fd_close(fd) {
 function _fd_fdstat_get(fd, pbuf) {
 	try {
 		var stream = SYSCALLS.getStreamFromFD(fd);
-console.log("_fd_fdstat_get path=",stream.path);
 		var type = stream.tty ? 2 : FS.isDir(stream.mode) ? 3 : FS.isLink(stream.mode) ? 7 : 4;
 		HEAP8[pbuf >> 0] = type;
 		return 0
@@ -8739,7 +8654,6 @@ console.log("_fd_fdstat_get path=",stream.path);
 function _fd_read(fd, iov, iovcnt, pnum) {
 	try {
 		var stream = SYSCALLS.getStreamFromFD(fd);
-console.log("_fd_read path=",stream.path);
 		var num = SYSCALLS.doReadv(stream, iov, iovcnt);
 		HEAP32[pnum >> 2] = num;
 		return 0
@@ -8752,7 +8666,6 @@ console.log("_fd_read path=",stream.path);
 function _fd_seek(fd, offset_low, offset_high, whence, newOffset) {
 	try {
 		var stream = SYSCALLS.getStreamFromFD(fd);
-console.log("_fd_seek path=",stream.path);
 		var HIGH_OFFSET = 4294967296;
 		var offset = offset_high * HIGH_OFFSET + (offset_low >>> 0);
 		var DOUBLE_LIMIT = 9007199254740992;
@@ -9585,7 +9498,6 @@ function callMain(args) {
 }
 
 function run(args) {
-console.log("run with args=",args,arguments_);
 	args = args || arguments_;
 	if (runDependencies > 0) {
 		return
