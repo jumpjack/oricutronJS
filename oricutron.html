@@ -131,7 +131,7 @@
 </head>
 <body>
 <center><big><big><big>Oricutron emulator for Javascript</big></big></big><br></center>
-<br>
+<br>1
 <div>
 <b>Load a local .dsk file to put it into emulator filesystem:</b><br>
 <br>
@@ -289,12 +289,17 @@ Module.setStatus("Downloading..."), window.onerror = function (e) {
 		const reader = new FileReader();
 
         reader.onprogress = function(data) {
+console.log("Load progress:", data);
             if (data.lengthComputable) {
                 var progress = parseInt( ((data.loaded / data.total) * 100), 10 );
                 console.log(progress);
                 document.getElementById("status2").innerHTML = progress + "% loaded.";
-            }
+            } else {
+				console.log(data);
+                document.getElementById("status2").innerHTML = "Loading " + myName + "...";
+			}
         }
+
 		reader.addEventListener('load', (event) => {
 				rawFileContents = event.target.result;
 				console.log("Loaded: ", event, rawFileContents.length);
