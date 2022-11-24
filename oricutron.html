@@ -131,7 +131,7 @@
 </head>
 <body>
 <center><big><big><big>Oricutron emulator for Javascript</big></big></big><br></center>
-<br>debug2
+<br>debu32
 
 <b>Load a local .dsk file to put it into emulator filesystem:</b><br>
 <br>
@@ -381,7 +381,7 @@ function writeToEmulatorFileSystem(dbName, tableName, dbVer, filecontents, filen
 		writeRequest.onsuccess = function() {
 			console.log("File added: ", writeRequest.result);
 	        fileObjects = transaction.objectStore(tableName);
-			filesList = fileObjects.getAll();
+			filesList = fileObjects.getAllKeys();
 			console.log("Files available in emulator: ",  filesList);
 
 			document.getElementById("status2").innerHTML = "File loaded. Click link to start emulator: ";
@@ -394,12 +394,14 @@ function writeToEmulatorFileSystem(dbName, tableName, dbVer, filecontents, filen
 		writeRequest.onerror = function() {
 			console.log("Error adding file", writeRequest.error);
 			console.log("writeRequest",writeRequest);
-			if (writeRequest.error.indexOf("already") >= 0) { // Error... but not an error: file is already there, so it's not stored again, but emulator can be started.
+			if (writeRequest.error.message.indexOf("already") >= 0) { // Error... but not an error: file is already there, so it's not stored again, but emulator can be started.
 		        fileObjects = transaction.objectStore(tableName);
-				filesList = fileObjects.getAll();
+				filesList = fileObjects.getAllKeys();
 				console.log("Files available in emulator: ",  filesList);
 				document.getElementById("status2").innerHTML = "File loaded. Click link to start emulator: ";
 	            document.getElementById("startlink").removeAttribute("hidden");
+			} else {
+				console.log("REAL error while writing " + filename + " to emulator filesystem, cannot proceed.");
 			}
 		};
 
