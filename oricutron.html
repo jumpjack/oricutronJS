@@ -131,7 +131,7 @@
 </head>
 <body>
 <center><big><big><big>Oricutron emulator for Javascript</big></big></big><br></center>
-<br>debug5
+<br>debug6
 
 <b>Load a local .dsk file to put it into emulator filesystem:</b><br>
 <br>
@@ -229,13 +229,18 @@ Module.setStatus("Downloading..."), window.onerror = function (e) {
 	}
 
     allfiles.innerHTML = "(none)";
-	avail = readFilenames();
-	avail.forEach((name) => {
-		bt = document.createElement("button");
-		bt.setAttribute("onclick", "sessionStorage.file = '" + name + "'; location.reload()");
-		bt.innerHTML = name;
-		allfiles.appendChild(bt);
-	});
+	try {
+		avail = readFilenames("/readwritefs","FILE_DATA",21);
+		avail.forEach((name) => {
+			bt = document.createElement("button");
+			bt.setAttribute("onclick", "sessionStorage.file = '" + name + "'; location.reload()");
+			bt.innerHTML = name;
+			allfiles.appendChild(bt);
+		});
+	} catch (er) {
+        llfiles.innerHTML = "(error)";
+		console.log(er);
+	}
 
 
     var downloadBlob, downloadURL;
@@ -358,7 +363,7 @@ function readFilenames(dbName, name2, name3,dbVer) {
 		});
 	  }
 
-	  filenames = transaction.objectStore(name3);
+	  filenames = transaction.objectStore(name2);
 	  lista=filenames.getAllKeys();
 console.log("lista",  lista);
 
