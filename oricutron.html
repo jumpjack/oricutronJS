@@ -143,6 +143,12 @@ automatically loading disk; all previously loaded disks will remain available in
 	<a href="oricutron.html" id="startlink" name="startlink" hidden>START</a><br>
 <br>
 <br>
+Last loaded file: <span id="lastloaded" name="lastloaded">-</span><br>
+Files already present in emulator filesystem: <span id="allfiles" name="allfiles">-</span><br>
+Start emulator without loading any disk: <button onclick="sessionStorage.file=''; location.reload();">START</button><br>
+<br>
+<br>
+<br>
 Debug:<br>
 <button onclick="sessionStorage.file=''">Delete filename from storage</button><br>
 <button onclick="clearDB()">Delete emulator filesystem from IndexedDB</button> (WARNING: GAME PROGRESS WILL BE ERASED!)<br>
@@ -214,6 +220,24 @@ Module.setStatus("Downloading..."), window.onerror = function (e) {
 
 
 <script>
+
+	lastFileName = sessionStorage.file;
+	if ((lastFileName != undefined) && (lastFileName != "")) {
+        document.getElementById("lastloaded").innerHTML = lastFileName;
+	} else {
+		document.getElementById("lastloaded").innerHTML = "(none)";
+	}
+
+    allfiles.innerHTML = "(none)";
+	avail = readFilenames();
+	avail.forEach((name) => {
+		bt = document.createElement("button");
+		bt.setAttribute("onclick", "sessionStorage.file = '" + name + "'; location.reload()");
+		bt.innerHTML = name;
+		allfiles.appendChild(bt);
+	});
+
+
     var downloadBlob, downloadURL;
 
     downloadBlob = function (data, fileName, mimeType) {
@@ -311,7 +335,7 @@ Module.setStatus("Downloading..."), window.onerror = function (e) {
 
 
 
-function debugRead(dbName, name2, name3,dbVer) {
+function readFilenames(dbName, name2, name3,dbVer) {
 	let openRequest = indexedDB.open(dbName, dbVer);
 
 	openRequest.onupgradeneeded = function() {
@@ -321,6 +345,7 @@ function debugRead(dbName, name2, name3,dbVer) {
 
 	openRequest.onerror = function() {
 	  console.error("Error", openRequest.error);
+	  return "error";
 	};
 
 	openRequest.onsuccess = function() {
@@ -333,12 +358,11 @@ function debugRead(dbName, name2, name3,dbVer) {
 		});
 	  }
 
-	console.log("tr", transaction);
 	  filenames = transaction.objectStore(name3);
-	console.log("filenames",  filenames);
-	  lista=filenames.getAll();
-	console.log("lista",  lista);
+	  lista=filenames.getAllKeys();
+console.log("lista",  lista);
 
+	return lista.result;
 	};
 }
 
