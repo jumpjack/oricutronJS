@@ -131,7 +131,7 @@
 </head>
 <body>
 <center><big><big><big>Oricutron emulator for Javascript</big></big></big><br></center>
-<br>debug13
+<br>debug build 14
 
 <b>Load a local .dsk file to put it into emulator filesystem:</b><br>
 <br>
@@ -335,7 +335,7 @@ Module.setStatus("Downloading..."), window.onerror = function (e) {
 
 
 
-function readFilenames(dbName, name2, name3,dbVer) {
+function readFilenames(dbName, tableName, name3,dbVer) {
 	let openRequest = indexedDB.open(dbName, dbVer);
 
 	openRequest.onupgradeneeded = function() {
@@ -350,12 +350,15 @@ function readFilenames(dbName, name2, name3,dbVer) {
 
 	openRequest.onsuccess = function() {
 	  db = openRequest.result;
-	  transaction = db.transaction(name2, "readwrite");
-	  transaction.oncomplete = function () {
+	  try {
+console.log("Searching db '" + tableName + "'...");
+	  	transaction = db.transaction(tableName, "readwrite");
+	  } catch (er) {
+console.log("     ERROR - Db '" + tableName + "' not found!");
+	  }
 
-console.log("result:");
+	  transaction.oncomplete = function () {
 		lista.result.forEach((f) => {
-console.log("raw list (after): ",  lista);
 			// Get only filename from full path:
 			temp = f.split("/");
 			onlyName = temp[temp.length-1];
@@ -371,7 +374,7 @@ console.log(f, onlyName);
 		});
 	  }
 
-	  filenames = transaction.objectStore(name2);
+	  filenames = transaction.objectStore(tableName);
 	  lista=filenames.getAllKeys();
 console.log("raw list (early): ",  lista);
 	};
