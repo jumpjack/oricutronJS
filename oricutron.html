@@ -130,16 +130,14 @@
     }</style>
 </head>
 <body>
+<center><big><big><big>Oricutron emulator for Javascript<br></center>
+<br>
 <div>
-<b>Load a local file</b>:<br>
+<b>Load a local .dsk file and put it into emulator filesystem:</b><br>
 <br>
 	<input type="file" id="inpFile" width="100"><br>
-	Status: <span id="status" name="status">(waiting user seleetion)</span><a href="oricutron.html" id="startlink" name="startlink" hidden>START</a><br>
+	Status: <span id="status2" name="status2">(waiting user seleetion)</span><a href="oricutron.html" id="startlink" name="startlink" hidden>START</a><br>
 <br>
-<br>
-or<br>
-<br>
-<a href="oricutron.html"><b>Start emulator loading latest used disk</a></b>: <span id="lastdisk" name="lastdisk">none</span><br>
 <br>
 
 
@@ -271,8 +269,7 @@ console.log("sessionStorage.file=",sessionStorage.file);
 const fileSelector = document.getElementById('inpFile');
 fileSelector.addEventListener('change', (event) => loadFile(event.target.files[0]));
 console.log("Ready.");
-document.getElementById("status").innerHTML = "READY.";
-document.getElementById("lastdisk").innerHTML = sessionStorage.file
+document.getElementById("status2").innerHTML = "READY.";
 //////////////
 
 	var db, mydb, objectStore;
