@@ -133,10 +133,14 @@
 <center><big><big><big>Oricutron emulator for Javascript</big></big><br></center>
 <br>
 <div>
-<b>Load a local .dsk file and put it into emulator filesystem:</b><br>
+<b>Load a local .dsk file to put it into emulator filesystem:</b><br>
 <br>
 	<input type="file" id="inpFile" width="100"><br>
-	Status: <span id="status2" name="status2">(waiting user seleetion)</span><a href="oricutron.html" id="startlink" name="startlink" hidden>START</a><br>
+	Status: <span id="status2" name="status2">(waiting user seleetion)</span><br>
+Once the dsk has been properly loaded into filesystem, you'll see a START link here below: click it to restart emulator,
+then load disk from inside emulator (right click, insert disk, navigate to /readwritefs folder).<br>
+<br>
+	<a href="oricutron.html" id="startlink" name="startlink" hidden>START</a><br>
 <br>
 <br>
 
@@ -350,7 +354,7 @@ function writeToEmulatorFileSystem(dbName, tableName, dbVer, filecontents, filen
 		try {
 			transaction = db.transaction(tableName, "readwrite");
 		} catch (e) {
-
+alert("Could not find emulator filesystem, please start emulator and try again");
 		}
 		fileObjects = transaction.objectStore(tableName);
 
@@ -372,7 +376,7 @@ function writeToEmulatorFileSystem(dbName, tableName, dbVer, filecontents, filen
 			filesList = fileObjects.getAll();
 			console.log("list:",  filesList);
 
-			document.getElementById("status").innerHTML = "File loaded. Click link to start emulator: ";
+			document.getElementById("status2").innerHTML = "File loaded. Click link to start emulator: ";
             document.getElementById("startlink").removeAttribute("hidden");
 
 
