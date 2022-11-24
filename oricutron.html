@@ -422,12 +422,12 @@ function clearDB() {
 	DBDeleteRequest.onsuccess = (event) => {
 	  document.getElementById("status3").innerHTML = "Database 1 deleted successfully";
 	  console.log("Database 1 deleted successfully");
-
-	  console.log(event.result); // should be undefined
 	}
 
 	try {
+		console.log("Deleting 2...");
 		DBDeleteRequest2 = window.indexedDB.deleteDatabase("emscripten_filesystem");
+		console.log("Ok 2...");
 	} catch(e) {
 		document.getElementById("status3").innerHTML = "Error 001 deleting database 2";
 		console.error("Error 001 deleting database 2:", e);
@@ -441,11 +441,9 @@ function clearDB() {
 	DBDeleteRequest2.onsuccess = (event) => {
 	  document.getElementById("status4").innerHTML = "Database 2 deleted successfully";
 	  console.log("Database 2 deleted successfully");
-
-	  console.log(event.result); // should be undefined
 	}
 
-	console.log(DBDeleteRequest,DBDeleteRequest2);
+	console.log("End:",DBDeleteRequest,DBDeleteRequest2);
 
 }
 
