@@ -208,7 +208,6 @@ Module.setStatus("Downloading..."), window.onerror = function (e) {
 
 <script>
     Module.preRun.push(function () {
-console.log("sessionStorage.file=",sessionStorage.file);
         ENV.FILE = sessionStorage.file
     });
 </script>
@@ -383,7 +382,7 @@ function writeToEmulatorFileSystem(dbName, tableName, dbVer, filecontents, filen
 
 			document.getElementById("status2").innerHTML = "File loaded. Click link to start emulator: ";
             document.getElementById("startlink").removeAttribute("hidden");
-			location.reload();
+			//location.reload();
 
 
 		};
