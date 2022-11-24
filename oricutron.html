@@ -131,8 +131,8 @@
 </head>
 <body>
 <center><big><big><big>Oricutron emulator for Javascript</big></big></big><br></center>
-<br>1
-<div>
+<br>debug1
+
 <b>Load a local .dsk file to put it into emulator filesystem:</b><br>
 <br>
 	<input type="file" id="inpFile" width="100"><br>
@@ -304,8 +304,9 @@ console.log("Load progress:", data);
 				rawFileContents = event.target.result;
 				console.log("Loaded: ", event, rawFileContents.length);
 				fileContentsUInt8 = new Uint8Array(rawFileContents); // Extract from the generic ArrayBuffer an array of Unsigned Integers (0..255)
-				console.log(fileContentsUInt8);
+				console.log("Writing to emulator filesystem...");
                 writeToEmulatorFileSystem("/readwritefs","FILE_DATA", 21,fileContentsUInt8, myName)
+				console.log("Written.");
 		});
 		reader.readAsArrayBuffer(fileHandler); // Read as arrayBuffer as "readAsBinaryString" is deprecated but we don't want Javascript to interpret the file at its own wish...
 		console.log("Reading process initiated...");
@@ -381,11 +382,10 @@ function writeToEmulatorFileSystem(dbName, tableName, dbVer, filecontents, filen
 		console.log("writeRequest",writeRequest);
 
 		writeRequest.onsuccess = function() {
-			console.log("File added", writeRequest.result);
+			console.log("File added: ", writeRequest.result);
 	        fileObjects = transaction.objectStore(tableName);
-			console.log("filenames",  fileObjects);
 			filesList = fileObjects.getAll();
-			console.log("list:",  filesList);
+			console.log("Files available in emulator: ",  filesList);
 
 			document.getElementById("status2").innerHTML = "File loaded. Click link to start emulator: ";
             document.getElementById("startlink").removeAttribute("hidden");
@@ -395,7 +395,14 @@ function writeToEmulatorFileSystem(dbName, tableName, dbVer, filecontents, filen
 		};
 
 		writeRequest.onerror = function() {
-		console.log("Error adding file", writeRequest.error);
+			console.log("Error adding file", writeRequest.error);
+			if (writeRequest.error.indexOf("already") >= 0) { // Error... but not an error: file is already there, so it's not stored again, but emulator can be started.
+		        fileObjects = transaction.objectStore(tableName);
+				filesList = fileObjects.getAll();
+				console.log("Files available in emulator: ",  filesList);
+				document.getElementById("status2").innerHTML = "File loaded. Click link to start emulator: ";
+	            document.getElementById("startlink").removeAttribute("hidden");
+			}
 		};
 
 
