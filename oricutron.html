@@ -131,7 +131,7 @@
 </head>
 <body>
 <center><big><big><big>Oricutron emulator for Javascript</big></big></big><br></center>
-<br>debug build 17
+<br>debug build 18
 <br>
 
 <b>Load a local .dsk file to put it into emulator filesystem:</b><br>
@@ -224,6 +224,7 @@ Module.setStatus("Downloading..."), window.onerror = function (e) {
 
 <script>
 
+function readEmulatorData() {
 	lastFileName = sessionStorage.file;
 	if ((lastFileName != undefined) && (lastFileName != "")) {
         document.getElementById("lastloaded").innerHTML = lastFileName;
@@ -239,7 +240,7 @@ Module.setStatus("Downloading..."), window.onerror = function (e) {
 		console.log(er);
 	}
 
-
+}
     var downloadBlob, downloadURL;
 
     downloadBlob = function (data, fileName, mimeType) {
