@@ -131,7 +131,7 @@
 </head>
 <body>
 <center><big><big><big>Oricutron emulator for Javascript</big></big></big><br></center>
-<br>debug9
+<br>debug10
 
 <b>Load a local .dsk file to put it into emulator filesystem:</b><br>
 <br>
@@ -352,6 +352,8 @@ function readFilenames(dbName, name2, name3,dbVer) {
 	  db = openRequest.result;
 	  transaction = db.transaction(name2, "readwrite");
 	  transaction.oncomplete = function () {
+	  	lista=filenames.getAllKeys();
+console.log("raw list: ",  lista);
 console.log("result:");
 		lista.result.forEach((f) => {
 			// Get only filename from full path:
@@ -370,8 +372,7 @@ console.log(f, onlyName);
 	  }
 
 	  filenames = transaction.objectStore(name2);
-	  lista=filenames.getAllKeys();
-console.log("lista",  lista);
+
 	};
 }
 
