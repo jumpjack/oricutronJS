@@ -336,46 +336,52 @@ Module.setStatus("Downloading..."), window.onerror = function (e) {
 
 
 function readFilenames(dbName, tableName, name3,dbVer) {
-	let openRequest = indexedDB.open(dbName, dbVer);
+	try {
+		let openRequest = indexedDB.open(dbName, dbVer);
 
-	openRequest.onupgradeneeded = function() {
-	  // triggers if the client had no database
-	  // ...perform initialization...
-	};
+		openRequest.onupgradeneeded = function() {
+		  // triggers if the client had no database
+		  // ...perform initialization...
+		};
 
-	openRequest.onerror = function() {
-	  console.error("Error", openRequest.error);
-	  return "error";
-	};
+		openRequest.onerror = function() {
+		  console.error("Error", openRequest.error);
+		  return "error";
+		};
 
-	openRequest.onsuccess = function() {
-	  db = openRequest.result;
-	  try {
+		openRequest.onsuccess = function() {
+		  db = openRequest.result;
+		  try {
 console.log("Searching db '" + tableName + "'...");
-	  	transaction = db.transaction(tableName, "readwrite");
-		transaction.oncomplete = function () {
-			lista.result.forEach((f) => {
-				// Get only filename from full path:
-				temp = f.split("/");
-				onlyName = temp[temp.length-1];
+		  	transaction = db.transaction(tableName, "readwrite");
+			transaction.oncomplete = function () {
+				lista.result.forEach((f) => {
+					// Get only filename from full path:
+					temp = f.split("/");
+					onlyName = temp[temp.length-1];
 
-				// Add one button per each file:
-				br = document.createElement("br");
-				bt = document.createElement("button");
-				bt.setAttribute("onclick", "sessionStorage.file = '" + onlyName + "'; location.reload()");
-				bt.innerHTML = onlyName;
-				allfiles.appendChild(bt);
-				allfiles.appendChild(br);
+					// Add one button per each file:
+					br = document.createElement("br");
+					bt = document.createElement("button");
+					bt.setAttribute("onclick", "sessionStorage.file = '" + onlyName + "'; location.reload()");
+					bt.innerHTML = onlyName;
+					allfiles.appendChild(bt);
+					allfiles.appendChild(br);
 console.log(f, onlyName);
-			});
-		}
-		  filenames = transaction.objectStore(tableName);
-		  lista=filenames.getAllKeys();
-		} catch (er) {
-console.log("     ERROR - Db '" + tableName + "' not found?");
-	        allfiles.innerHTML = "Database error.";
-		}
-	};
+				});
+			}
+			  filenames = transaction.objectStore(tableName);
+			  lista=filenames.getAllKeys();
+			} catch (er) {
+console.log("     ERROR - Table '" + tableName + "' not found in db '" + dbName + "'?");
+		        allfiles.innerHTML = "Table error.";
+			}
+		};
+
+	} catch (ex) {
+console.log("ERROREmulator filesystem not found.");
+	}
+
 }
 
 
