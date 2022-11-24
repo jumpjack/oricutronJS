@@ -131,7 +131,7 @@
 </head>
 <body>
 <center><big><big><big>Oricutron emulator for Javascript</big></big></big><br></center>
-<br>debug8
+<br>debug9
 
 <b>Load a local .dsk file to put it into emulator filesystem:</b><br>
 <br>
@@ -144,7 +144,8 @@ automatically loading disk; all previously loaded disks will remain available in
 <br>
 <br>
 Last loaded file: <span id="lastloaded" name="lastloaded">-</span><br>
-Files already present in emulator filesystem: <span id="allfiles" name="allfiles">-</span><br>
+Files already present in emulator filesystem:<br>
+ <span id="allfiles" name="allfiles">-</span><br>
 Start emulator without loading any disk: <button onclick="sessionStorage.file=''; location.reload();">START</button><br>
 <br>
 <br>
@@ -228,7 +229,7 @@ Module.setStatus("Downloading..."), window.onerror = function (e) {
 		document.getElementById("lastloaded").innerHTML = "(none)";
 	}
 
-    allfiles.innerHTML = "(none)";
+    allfiles.innerHTML = "";
 	try {
 		readFilenames("/readwritefs","FILE_DATA",21);
 	} catch (er) {
