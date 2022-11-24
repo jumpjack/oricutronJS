@@ -1,13 +1,13 @@
-<!doctype html>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html lang=en-us>
 <head>
     <meta charset=utf-8>
-    <meta content="text/html; charset=utf-8" http-equiv=Content-Type>
+  	<meta http-equiv="content-type" content="text/html; charset=utf-8">
     <title>OricutronJS emulator launcher</title>
     <style>body {
         font-family: arial;
         margin: 0;
-        padding: none
+        padding: 0
     }
 
     .emscripten {
@@ -131,21 +131,21 @@
 </head>
 <body>
 <center><big><big><big>Oricutron emulator for Javascript</big></big></big><br></center>
-<br>debug11
+<br>debug13
 
 <b>Load a local .dsk file to put it into emulator filesystem:</b><br>
 <br>
-	<input type="file" id="inpFile" width="100"><br>
-	Status: <span id="status2" name="status2">(waiting user selection)</span><br>
+	<input type="file" id="inpFile" size="20"><br>
+	Status: <span id="status2">(waiting user selection)</span><br>
 Once the dsk has been properly loaded into filesystem, a START link will appear here below: click it to restart emulator
 automatically loading disk; all previously loaded disks will remain available in the emulator filesystem (right click, insert disk, navigate up to /readwritefs folder).<br>
 <br>
-	<a href="oricutron.html" id="startlink" name="startlink" hidden>START</a><br>
+	<a href="oricutron.html" id="startlink" hidden>START</a><br>
 <br>
 <br>
-Last loaded file: <span id="lastloaded" name="lastloaded">-</span><br>
+Last loaded file: <span id="lastloaded" >-</span><br>
 Files already present in emulator filesystem:<br>
- <span id="allfiles" name="allfiles">-</span><br>
+ <span id="allfiles" >-</span><br>
 Start emulator without loading any disk: <button onclick="sessionStorage.file=''; location.reload();">START</button><br>
 <br>
 <br>
@@ -153,8 +153,8 @@ Start emulator without loading any disk: <button onclick="sessionStorage.file=''
 Debug:<br>
 <button onclick="sessionStorage.file=''">Delete filename from storage</button><br>
 <button onclick="clearDB()">Delete emulator filesystem from IndexedDB</button> (WARNING: GAME PROGRESS WILL BE ERASED!)<br>
-DB1: <span id="status3" name="status3">-</span><br>
-DB2: <span id="status4" name="status4">-</span><br>
+DB1: <span id="status3" >-</span><br>
+DB2: <span id="status4" >-</span><br>
 <br>
 
 <div class=spinner id=spinner></div>
@@ -328,7 +328,7 @@ Module.setStatus("Downloading..."), window.onerror = function (e) {
 				fileContentsUInt8 = new Uint8Array(rawFileContents); // Extract from the generic ArrayBuffer an array of Unsigned Integers (0..255)
 				console.log("Writing to emulator filesystem...");
                 writeToEmulatorFileSystem("/readwritefs","FILE_DATA", 21,fileContentsUInt8, myName)
-				console.log("Written.");
+				console.log("Written?");
 		});
 		reader.readAsArrayBuffer(fileHandler); // Read as arrayBuffer as "readAsBinaryString" is deprecated but we don't want Javascript to interpret the file at its own wish...
 	}
@@ -453,7 +453,7 @@ function clearDB() {
 
 	try {
 		DBDeleteRequest = window.indexedDB.deleteDatabase("/readwritefs");
-	} catch(xe) {
+	} catch(ex) {
 		document.getElementById("status3").innerHTML = "Error 001 deleting database 1";
 		console.error("Error 001 deleting database 1:", ex);
 	}
