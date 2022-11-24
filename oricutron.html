@@ -137,8 +137,8 @@
 <br>
 	<input type="file" id="inpFile" width="100"><br>
 	Status: <span id="status2" name="status2">(waiting user selection)</span><br>
-Once the dsk has been properly loaded into filesystem, you'll see a START link here below: click it to restart emulator,
-then load disk from inside emulator (right click, insert disk, navigate to /readwritefs folder).<br>
+Once the dsk has been properly loaded into filesystem, a START link will appear here below: click it to restart emulator
+automatically loading disk; all previously loaded disks will remain available in the emulator filesystem (right click, insert disk, navigate up to /readwritefs folder).<br>
 <br>
 	<a href="oricutron.html" id="startlink" name="startlink" hidden>START</a><br>
 <br>
@@ -272,27 +272,29 @@ Module.setStatus("Downloading..."), window.onerror = function (e) {
     }
 
 
-///// This section allows loading files from local hard disk, on client: ///////////
-const fileSelector = document.getElementById('inpFile');
-fileSelector.addEventListener('change', (event) => loadFile(event.target.files[0]));
-console.log("Ready.");
-document.getElementById("status2").innerHTML = "READY.";
-//////////////
+	///// This section allows loading files from local hard disk, on client: ///////////
+	const fileSelector = document.getElementById('inpFile');
+	fileSelector.addEventListener('change', (event) => loadFile(event.target.files[0]));
+	console.log("Ready.");
+	document.getElementById("status2").innerHTML = "READY.";
 
 	var db, mydb, objectStore;
 	var myName;
 	var fileContentsUInt8;
 
 	function loadFile(fileHandler) {
-		// The file is read as ArrayBuffer to keep contents raw, without interpretations from Javascript engine
-		// The raw array can then be converted to array of bytes (8 bit) (signed or unsigned) or of integers (16 bit).
-		// If interpreted as a string of characters, the raw array will be automatically converted by javascript using UTF16 encoder.
-		// If you need UTF-8 encoding, you must	use TextDecoder("utf8").
-		// Supported encodings: https://developer.mozilla.org/en-US/docs/Web/API/Encoding_API/Encodings
-
+        document.getElementById("startlink").setAttribute("hidden",true);
 		console.log("File to open:" ,fileHandler);
 		myName = fileHandler.name;
 		const reader = new FileReader();
+
+        reader.onprogress = function(data) {
+            if (data.lengthComputable) {
+                var progress = parseInt( ((data.loaded / data.total) * 100), 10 );
+                console.log(progress);
+                document.getElementById("status2").innerHTML = progress + "% loaded.";
+            }
+        }
 		reader.addEventListener('load', (event) => {
 				rawFileContents = event.target.result;
 				console.log("Loaded: ", event, rawFileContents.length);
