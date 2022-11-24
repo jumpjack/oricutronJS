@@ -131,7 +131,7 @@
 </head>
 <body>
 <center><big><big><big>Oricutron emulator for Javascript</big></big></big><br></center>
-<br>debu32
+<br>debug4
 
 <b>Load a local .dsk file to put it into emulator filesystem:</b><br>
 <br>
@@ -376,13 +376,10 @@ function writeToEmulatorFileSystem(dbName, tableName, dbVer, filecontents, filen
 		sessionStorage.file = filename; // Filename is read by emulator from browser's sessionStorage
 		let writeRequest = fileObjects.add(fileobject, "/readwritefs/" + filename); // File contents are read by emulator from browser's IndexedDB
 
-		console.log("writeRequest",writeRequest);
-
 		writeRequest.onsuccess = function() {
 			console.log("File added: ", writeRequest.result);
 	        fileObjects = transaction.objectStore(tableName);
 			filesList = fileObjects.getAllKeys();
-			console.log("Files available in emulator: ",  filesList);
 
 			document.getElementById("status2").innerHTML = "File loaded. Click link to start emulator: ";
             document.getElementById("startlink").removeAttribute("hidden");
@@ -397,7 +394,6 @@ function writeToEmulatorFileSystem(dbName, tableName, dbVer, filecontents, filen
 			if (writeRequest.error.message.indexOf("already") >= 0) { // Error... but not an error: file is already there, so it's not stored again, but emulator can be started.
 		        fileObjects = transaction.objectStore(tableName);
 				filesList = fileObjects.getAllKeys();
-				console.log("Files available in emulator: ",  filesList);
 				document.getElementById("status2").innerHTML = "File loaded. Click link to start emulator: ";
 	            document.getElementById("startlink").removeAttribute("hidden");
 			} else {
