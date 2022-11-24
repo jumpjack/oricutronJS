@@ -291,9 +291,6 @@ document.getElementById("status2").innerHTML = "READY.";
 				console.log("Loaded: ", event, rawFileContents.length);
 				fileContentsUInt8 = new Uint8Array(rawFileContents); // Extract from the generic ArrayBuffer an array of Unsigned Integers (0..255)
 				console.log(fileContentsUInt8);
-				document.getElementById("status").innerHTML = "File loaded. Click link to start emulator: ";
-                document.getElementById("startlink").removeAttribute("hidden");
-                document.getElementById("lastdisk").innerHTML=myName;
                 writeToEmulatorFileSystem("/readwritefs","FILE_DATA", 21,fileContentsUInt8, myName)
 		});
 		reader.readAsArrayBuffer(fileHandler); // Read as arrayBuffer as "readAsBinaryString" is deprecated but we don't want Javascript to interpret the file at its own wish...
@@ -374,6 +371,11 @@ function writeToEmulatorFileSystem(dbName, tableName, dbVer, filecontents, filen
 			console.log("filenames",  fileObjects);
 			filesList = fileObjects.getAll();
 			console.log("list:",  filesList);
+
+			document.getElementById("status").innerHTML = "File loaded. Click link to start emulator: ";
+            document.getElementById("startlink").removeAttribute("hidden");
+
+
 		};
 
 		writeRequest.onerror = function() {
