@@ -128,7 +128,149 @@
         font-family: 'Lucida Console', Monaco, monospace;
         outline: 0
     }</style>
+</head>
+<body>
+<center><big><big><big>Oricutron emulator for Javascript</big></big></big><br></center>
+<br>
+<div>
+<b>Load a local .dsk file to put it into emulator filesystem:</b><br>
+<br>
+	<input type="file" id="inpFile" width="100"><br>
+	Status: <span id="status2" name="status2">(waiting user selection)</span><br>
+Once the dsk has been properly loaded into filesystem, you'll see a START link here below: click it to restart emulator,
+then load disk from inside emulator (right click, insert disk, navigate to /readwritefs folder).<br>
+<br>
+	<a href="oricutron.html" id="startlink" name="startlink" hidden>START</a><br>
+<br>
+<br>
+Debug:<br>
+<button onclick="sessionStorage.file=''">Delete filename from storage</button><br>
+<button onclick="clearDB()">Delete emulator filesystem from IndexedDB</button> (WARNING: GAME PROGRESS WILL BE ERASED!)<br>
+DB1: <span id="status3" name="status3">-</span><br>
+DB2: <span id="status4" name="status4">-</span><br>
+<br>
+
+<div class=spinner id=spinner></div>
+<div class=emscripten id=status>Downloading...</div>
+<div class=emscripten>
+    <progress hidden id=progress max=100 value=0></progress>
+</div>
+<div class=emscripten_border>
+    <canvas class=emscripten id=canvas oncontextmenu=event.preventDefault() tabindex=-1></canvas>
+</div>
+Output:<br>
+<textarea id=output rows=8></textarea>
+
+
 <script>
+var statusElement = document.getElementById("status"),
+	progressElement = document.getElementById("progress"),
+    spinnerElement = document.getElementById("spinner"),
+	Module = {
+        preRun: [],
+		postRun: [],
+		print: function () {
+            var e = document.getElementById("output");
+            return e && (e.value = ""), function (t) {
+                arguments.length > 1 && (t = Array.prototype.slice.call(arguments).join(" ")), console.log(t), e && (e.value += t + "\n", e.scrollTop = e.scrollHeight)
+            }
+        }(),
+		printErr: function (e) {
+            arguments.length > 1 && (e = Array.prototype.slice.call(arguments).join(" ")), console.error(e)
+        },
+		canvas: function () {
+            var e = document.getElementById("canvas");
+            return e.addEventListener("webglcontextlost", (function (e) {
+                alert("WebGL context lost. You will need to reload the page."), e.preventDefault()
+            }), !1), e
+        }(),
+		setStatus: function (e) {
+            if (Module.setStatus.last || (Module.setStatus.last = {
+                time: Date.now(),
+                text: ""
+            }), e !== Module.setStatus.last.text) {
+                var t = e.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/), n = Date.now();
+                t && n - Module.setStatus.last.time < 30 || (Module.setStatus.last.time = n, Module.setStatus.last.text = e, t ? (e = t[1], progressElement.value = 100 * parseInt(t[2]), progressElement.max = 100 * parseInt(t[4]), progressElement.hidden = !1, spinnerElement.hidden = !1) : (progressElement.value = null, progressElement.max = null, progressElement.hidden = !0, e || (spinnerElement.style.display = "none")), statusElement.innerHTML = e)
+            }
+        },
+		totalDependencies: 0,
+		monitorRunDependencies: function (e) {
+            this.totalDependencies = Math.max(this.totalDependencies, e), Module.setStatus(e ? "Preparing... (" + (this.totalDependencies - e) + "/" + this.totalDependencies + ")" : "All downloads complete.")
+        }
+    };
+
+Module.setStatus("Downloading..."), window.onerror = function (e) {
+    Module.setStatus("Exception thrown, see JavaScript console"), spinnerElement.style.display = "none", Module.setStatus = function (e) {
+        e && Module.printErr("[post-exception status] " + e)
+    }
+}</script>
+
+
+<script>
+    Module.preRun.push(function () {
+console.log("sessionStorage.file=",sessionStorage.file);
+        ENV.FILE = sessionStorage.file
+    });
+</script>
+
+
+<script>
+    var downloadBlob, downloadURL;
+
+    downloadBlob = function (data, fileName, mimeType) {
+        var blob, url;
+        blob = new Blob([data], {
+            type: mimeType
+        });
+        url = window.URL.createObjectURL(blob);
+        downloadURL(url, fileName);
+        setTimeout(function () {
+            var fileList = document.getElementById('fileList');
+            fileList.innerHTML = '';
+            return window.URL.revokeObjectURL(url);
+        }, 1000);
+    };
+
+    downloadURL = function (data, fileName) {
+        var a;
+        a = document.createElement('a');
+        a.href = data;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.style = 'display: none';
+        a.click();
+        a.remove();
+    };
+
+    function createLink(file) {
+        var newLink = document.createElement('a');
+        newLink.setAttribute('href', '');
+        newLink.addEventListener("click", function (event) {
+            event.preventDefault();
+            var ret = FS.readFile('/readwritefs/' + file, {flags: 'r'});
+            console.log(ret);
+            downloadBlob(ret, file, 'application/octet-stream');
+        });
+        var newText = document.createTextNode(file);
+        newLink.appendChild(newText);
+
+        return newLink;
+    }
+
+    function getFileList() {
+        var node = FS.readdir('/readwritefs/');
+
+        console.log("node=",node);
+
+        var fileList = document.getElementById('fileList');
+        node.forEach(function (file) {
+            if (file !== '.' && file !== '..') {
+                var newLink = createLink(file);
+                fileList.appendChild(newLink);
+                fileList.appendChild(document.createElement('br'));
+            }
+        });
+    }
 
 
 ///// This section allows loading files from local hard disk, on client: ///////////
@@ -215,8 +357,9 @@ function writeToEmulatorFileSystem(dbName, tableName, dbVer, filecontents, filen
 		db = openRequest.result;
 		try {
 			transaction = db.transaction(tableName, "readwrite");
-		} catch (e) {
-alert("Could not find emulator filesystem, please start emulator and try again");
+		} catch (ex) {
+			alert("Could not find emulator filesystem, please start emulator and try again");
+			console.log("Could not find emulator filesystem, please start emulator and try again.",ex);
 		}
 		fileObjects = transaction.objectStore(tableName);
 
@@ -266,9 +409,9 @@ function clearDB() {
 
 	try {
 		DBDeleteRequest = window.indexedDB.deleteDatabase("/readwritefs");
-	} catch(e) {
+	} catch(xe) {
 		document.getElementById("status3").innerHTML = "Error 001 deleting database 1";
-		console.error("Error 001 deleting database 1:", e);
+		console.error("Error 001 deleting database 1:", ex);
 	}
 
 	DBDeleteRequest.onerror = (event) => {
@@ -285,9 +428,9 @@ function clearDB() {
 		console.log("Deleting 2...");
 		DBDeleteRequest2 = window.indexedDB.deleteDatabase("emscripten_filesystem");
 		console.log("Ok 2...");
-	} catch(e) {
+	} catch(ex) {
 		document.getElementById("status3").innerHTML = "Error 001 deleting database 2";
-		console.error("Error 001 deleting database 2:", e);
+		console.error("Error 001 deleting database 2:", ex);
 	}
 
 	DBDeleteRequest2.onerror = (event) => {
@@ -303,155 +446,10 @@ function clearDB() {
 	console.log("End:",DBDeleteRequest,DBDeleteRequest2);
 
 }
-</script>
-</head>
 
-<body>
-<center><big><big><big>Oricutron emulator for Javascript</big></big></big><br></center>
-<br>
-<div>
-<b>Load a local .dsk file to put it into emulator filesystem:</b><br>
-<br>
-	<input type="file" id="inpFile" width="100"><br>
-	Status: <span id="status2" name="status2">(waiting user selection)</span><br>
-Once the dsk has been properly loaded into filesystem, you'll see a START link here below: click it to restart emulator,
-then load disk from inside emulator (right click, insert disk, navigate to /readwritefs folder).<br>
-<br>
-	<a href="oricutron.html" id="startlink" name="startlink" hidden>START</a><br>
-<br>
-<br>
-Debug:<br>
-<button onclick="sessionStorage.file=''">Delete filename from storage</button><br>
-<button onclick="clearDB()">Delete emulator filesystem from IndexedDB</button> (WARNING: GAME PROGRESS WILL BE ERASED!)<br>
-DB1: <span id="status3" name="status3">-</span><br>
-DB2: <span id="status4" name="status4">-</span><br>
-<br>
-
-<div class=spinner id=spinner></div>
-<div class=emscripten id=status>Downloading...</div>
-<div class=emscripten>
-    <progress hidden id=progress max=100 value=0></progress>
-</div>
-<div class=emscripten_border>
-    <canvas class=emscripten id=canvas oncontextmenu=event.preventDefault() tabindex=-1></canvas>
-</div>
-Output:<br>
-<textarea id=output rows=8></textarea>
-
-
-<script>
-var statusElement = document.getElementById("status"),
-	progressElement = document.getElementById("progress"),
-    spinnerElement = document.getElementById("spinner"),
-	Module = {
-        preRun: [],
-		postRun: [],
-		print: function () {
-            var e = document.getElementById("output");
-            return e && (e.value = ""), function (t) {
-                arguments.length > 1 && (t = Array.prototype.slice.call(arguments).join(" ")), console.log(t), e && (e.value += t + "\n", e.scrollTop = e.scrollHeight)
-            }
-        }(),
-		printErr: function (e) {
-            arguments.length > 1 && (e = Array.prototype.slice.call(arguments).join(" ")), console.error(e)
-        },
-		canvas: function () {
-            var e = document.getElementById("canvas");
-            return e.addEventListener("webglcontextlost", (function (e) {
-                alert("WebGL context lost. You will need to reload the page."), e.preventDefault()
-            }), !1), e
-        }(),
-		setStatus: function (e) {
-            if (Module.setStatus.last || (Module.setStatus.last = {
-                time: Date.now(),
-                text: ""
-            }), e !== Module.setStatus.last.text) {
-                var t = e.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/), n = Date.now();
-                t && n - Module.setStatus.last.time < 30 || (Module.setStatus.last.time = n, Module.setStatus.last.text = e, t ? (e = t[1], progressElement.value = 100 * parseInt(t[2]), progressElement.max = 100 * parseInt(t[4]), progressElement.hidden = !1, spinnerElement.hidden = !1) : (progressElement.value = null, progressElement.max = null, progressElement.hidden = !0, e || (spinnerElement.style.display = "none")), statusElement.innerHTML = e)
-            }
-        },
-		totalDependencies: 0,
-		monitorRunDependencies: function (e) {
-            this.totalDependencies = Math.max(this.totalDependencies, e), Module.setStatus(e ? "Preparing... (" + (this.totalDependencies - e) + "/" + this.totalDependencies + ")" : "All downloads complete.")
-        }
-    };
-
-Module.setStatus("Downloading..."), window.onerror = function (e) {
-    Module.setStatus("Exception thrown, see JavaScript console"), spinnerElement.style.display = "none", Module.setStatus = function (e) {
-        e && Module.printErr("[post-exception status] " + e)
-    }
-}</script>
-
-
-<script>
-    Module.preRun.push(function () {
-console.log("sessionStorage.file=",sessionStorage.file);
-        ENV.FILE = sessionStorage.file
-    });
 </script>
 
 <script async src=Oricutron.js></script>
-
-<script>
-    var downloadBlob, downloadURL;
-
-    downloadBlob = function (data, fileName, mimeType) {
-        var blob, url;
-        blob = new Blob([data], {
-            type: mimeType
-        });
-        url = window.URL.createObjectURL(blob);
-        downloadURL(url, fileName);
-        setTimeout(function () {
-            var fileList = document.getElementById('fileList');
-            fileList.innerHTML = '';
-            return window.URL.revokeObjectURL(url);
-        }, 1000);
-    };
-
-    downloadURL = function (data, fileName) {
-        var a;
-        a = document.createElement('a');
-        a.href = data;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.style = 'display: none';
-        a.click();
-        a.remove();
-    };
-
-    function createLink(file) {
-        var newLink = document.createElement('a');
-        newLink.setAttribute('href', '');
-        newLink.addEventListener("click", function (event) {
-            event.preventDefault();
-            var ret = FS.readFile('/readwritefs/' + file, {flags: 'r'});
-            console.log(ret);
-            downloadBlob(ret, file, 'application/octet-stream');
-        });
-        var newText = document.createTextNode(file);
-        newLink.appendChild(newText);
-
-        return newLink;
-    }
-
-    function getFileList() {
-        var node = FS.readdir('/readwritefs/');
-
-        console.log("node=",node);
-
-        var fileList = document.getElementById('fileList');
-        node.forEach(function (file) {
-            if (file !== '.' && file !== '..') {
-                var newLink = createLink(file);
-                fileList.appendChild(newLink);
-                fileList.appendChild(document.createElement('br'));
-            }
-        });
-    }
-
-
-</script>
 
 </body>
 </html>
