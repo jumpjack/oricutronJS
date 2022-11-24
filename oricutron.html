@@ -130,20 +130,25 @@
     }</style>
 </head>
 <body>
-<center><big><big><big>Oricutron emulator for Javascript</big></big><br></center>
+<center><big><big><big>Oricutron emulator for Javascript</big></big></big><br></center>
 <br>
 <div>
 <b>Load a local .dsk file to put it into emulator filesystem:</b><br>
 <br>
 	<input type="file" id="inpFile" width="100"><br>
-	Status: <span id="status2" name="status2">(waiting user seleetion)</span><br>
+	Status: <span id="status2" name="status2">(waiting user selection)</span><br>
 Once the dsk has been properly loaded into filesystem, you'll see a START link here below: click it to restart emulator,
 then load disk from inside emulator (right click, insert disk, navigate to /readwritefs folder).<br>
 <br>
 	<a href="oricutron.html" id="startlink" name="startlink" hidden>START</a><br>
 <br>
 <br>
-
+Debug:<br>
+<button onclick="sessionStorage.file=''">Delete filename from storage</button><br>
+<button onclick="clearDB()">Delete emulator filesystem from IndexedDB</button> (WARNING: GAME PROGRESS WILL BE ERASED!)<br>
+DB1: <span id="status3" name="status3">-</span><br>
+DB2: <span id="status4" name="status4">-</span><br>
+<br>
 
 <div class=spinner id=spinner></div>
 <div class=emscripten id=status>Downloading...</div>
@@ -396,6 +401,52 @@ alert("Could not find emulator filesystem, please start emulator and try again")
 	}
 
 };
+
+function clearDB() {
+	var DBDeleteRequest;
+	var DBDeleteRequest2;
+
+	try {
+		DBDeleteRequest = window.indexedDB.deleteDatabase("/readwritefs");
+	} catch(e) {
+		document.getElementById("status3").innerHTML = "Error 001 deleting database 1";
+		console.error("Error 001 deleting database 1:", e);
+	}
+
+	DBDeleteRequest.onerror = (event) => {
+	  document.getElementById("status3").innerHTML = "Error deleting database 1";
+	  console.error("Error 002 deleting database 1.");
+	};
+
+	DBDeleteRequest.onsuccess = (event) => {
+	  document.getElementById("status3").innerHTML = "Database 1 deleted successfully";
+	  console.log("Database 1 deleted successfully");
+
+	  console.log(event.result); // should be undefined
+	}
+
+	try {
+		DBDeleteRequest2 = window.indexedDB.deleteDatabase("emscripten_filesystem");
+	} catch(e) {
+		document.getElementById("status3").innerHTML = "Error 001 deleting database 2";
+		console.error("Error 001 deleting database 2:", e);
+	}
+
+	DBDeleteRequest2.onerror = (event) => {
+	  document.getElementById("status3").innerHTML = "Error deleting database 2";
+	  console.error("Error 002 deleting database2.");
+	};
+
+	DBDeleteRequest2.onsuccess = (event) => {
+	  document.getElementById("status4").innerHTML = "Database 2 deleted successfully";
+	  console.log("Database 2 deleted successfully");
+
+	  console.log(event.result); // should be undefined
+	}
+
+	console.log(DBDeleteRequest,DBDeleteRequest2);
+
+}
 
 </script>
 
