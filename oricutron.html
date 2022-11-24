@@ -131,7 +131,8 @@
 </head>
 <body>
 <center><big><big><big>Oricutron emulator for Javascript</big></big></big><br></center>
-<br>debug build 15<br>
+<br>debug build 16
+<br>
 
 <b>Load a local .dsk file to put it into emulator filesystem:</b><br>
 <br>
@@ -388,68 +389,76 @@ console.log("ERROREmulator filesystem not found.");
 
 function writeToEmulatorFileSystem(dbName, tableName, dbVer, filecontents, filename) {
 	console.log("Opening db ", dbName , " to add record '" ,filename , " in ", tableName);
-	let openRequest = indexedDB.open(dbName, dbVer);
+	try {
+		let openRequest = indexedDB.open(dbName, dbVer);
 
-	openRequest.onupgradeneeded = function() {
-	  // triggers if the client had no database
-	  // ...perform initialization...
-	};
-
-	openRequest.onerror = function() {
-	  console.error("Error while writing file ",filename,  openRequest.error);
-	};
-
-	openRequest.onsuccess = function() {
-		db = openRequest.result;
-		try {
-			transaction = db.transaction(tableName, "readwrite");
-		} catch (ex) {
-			alert("Could not find emulator filesystem, please start emulator and try again");
-			console.log("Could not find emulator filesystem, please start emulator and try again.",ex);
-		}
-		fileObjects = transaction.objectStore(tableName);
-
-		let fileobject = {
-			contents: filecontents,
-			mode: 33206,
-			timestamp: new Date()
+		openRequest.onupgradeneeded = function() {
+		  // triggers if the client had no database
+		  // ...perform initialization...
 		};
 
-		sessionStorage.file = filename; // Filename is read by emulator from browser's sessionStorage
-		let writeRequest = fileObjects.add(fileobject, "/readwritefs/" + filename); // File contents are read by emulator from browser's IndexedDB
-
-		writeRequest.onsuccess = function() {
-			console.log("File added: ", writeRequest.result);
-	        fileObjects = transaction.objectStore(tableName);
-			filesList = fileObjects.getAllKeys();
-
-			document.getElementById("status2").innerHTML = "File loaded. Click link to start emulator: ";
-            document.getElementById("startlink").removeAttribute("hidden");
-			//location.reload();
-
-
+		openRequest.onerror = function() {
+		  console.error("Error while writing file ",filename,  openRequest.error);
 		};
 
-		writeRequest.onerror = function() {
-			console.log("Error adding file", writeRequest.error);
-			console.log("writeRequest",writeRequest);
-			if (writeRequest.error.message.indexOf("already") >= 0) { // Error... but not an error: file is already there, so it's not stored again, but emulator can be started.
-		        fileObjects = transaction.objectStore(tableName);
-				filesList = fileObjects.getAllKeys();
-				document.getElementById("status2").innerHTML = "File loaded. Click link to start emulator: ";
-	            document.getElementById("startlink").removeAttribute("hidden");
-			} else {
-				console.log("REAL error while writing " + filename + " to emulator filesystem, cannot proceed.");
+		openRequest.onsuccess = function() {
+			db = openRequest.result;
+			try {
+				transaction = db.transaction(tableName, "readwrite");
+
+				fileObjects = transaction.objectStore(tableName);
+
+				let fileobject = {
+					contents: filecontents,
+					mode: 33206,
+					timestamp: new Date()
+				};
+
+				sessionStorage.file = filename; // Filename is read by emulator from browser's sessionStorage
+				let writeRequest = fileObjects.add(fileobject, "/readwritefs/" + filename); // File contents are read by emulator from browser's IndexedDB
+
+				writeRequest.onsuccess = function() {
+					console.log("File added: ", writeRequest.result);
+			        fileObjects = transaction.objectStore(tableName);
+					filesList = fileObjects.getAllKeys();
+
+					document.getElementById("status2").innerHTML = "File loaded. Click link to start emulator: ";
+		            document.getElementById("startlink").removeAttribute("hidden");
+					//location.reload();
+
+
+				};
+
+				writeRequest.onerror = function() {
+					console.log("Error adding file", writeRequest.error);
+					console.log("writeRequest",writeRequest);
+					if (writeRequest.error.message.indexOf("already") >= 0) { // Error... but not an error: file is already there, so it's not stored again, but emulator can be started.
+				        fileObjects = transaction.objectStore(tableName);
+						filesList = fileObjects.getAllKeys();
+						document.getElementById("status2").innerHTML = "File loaded. Click link to start emulator: ";
+			            document.getElementById("startlink").removeAttribute("hidden");
+					} else {
+						console.log("REAL error while writing " + filename + " to emulator filesystem, cannot proceed.");
+					}
+				};
+
+
+				transaction.oncomplete = function () {
+					console.log("Final list:");
+					filesList.result.forEach((f) => {
+						console.log("File: ", f);
+					});
+				}
+			} catch (ex) {
+				alert("Could not find table '" + tableName + "' in filesystem/db, please start emulator and try again");
+				console.log("Could not find table '" + tableName + "' in filesystem/db, please start emulator and try again",ex);
 			}
-		};
 
-
-		transaction.oncomplete = function () {
-			console.log("Final list:");
-			filesList.result.forEach((f) => {
-				console.log("File: ", f);
-			});
 		}
+
+
+	} catch (ex) {
+console.log("ERROR - Emulator filesystem not found.");
 	}
 
 };
