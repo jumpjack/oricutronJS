@@ -145,6 +145,12 @@ Oric filesystem to find **readwritefs** directory.<br>
 
     </div>
 </div>
+<b>Load a local file</b>:<br>
+<br>
+	<input type="file" id="inpFile" width="100"><br>
+	Status: <span id="status" name="status">(waiting user seleetion)</span><a href="oricutron.html" id="startlink" name="startlink" hidden>START</a><br>
+<br>
+
 <div class=spinner id=spinner></div>
 <div class=emscripten id=status>Downloading...</div>
 <div class=emscripten>
@@ -155,6 +161,8 @@ Oric filesystem to find **readwritefs** directory.<br>
 </div>
 Output:<br>
 <textarea id=output rows=8></textarea>
+
+
 <script>
 var statusElement = document.getElementById("status"),
 	progressElement = document.getElementById("progress"),
@@ -265,6 +273,135 @@ console.log("sessionStorage.file=",sessionStorage.file);
             }
         });
     }
+
+
+///// This section allows loading files from local hard disk, on client: ///////////
+const fileSelector = document.getElementById('inpFile');
+fileSelector.addEventListener('change', (event) => loadFile(event.target.files[0]));
+console.log("Ready.");
+document.getElementById("status").innerHTML = "READY.";
+document.getElementById("lastdisk").innerHTML = sessionStorage.file
+//////////////
+
+	var db, mydb, objectStore;
+	var myName;
+	var fileContentsUInt8;
+
+	function loadFile(fileHandler) {
+		// The file is read as ArrayBuffer to keep contents raw, without interpretations from Javascript engine
+		// The raw array can then be converted to array of bytes (8 bit) (signed or unsigned) or of integers (16 bit).
+		// If interpreted as a string of characters, the raw array will be automatically converted by javascript using UTF16 encoder.
+		// If you need UTF-8 encoding, you must	use TextDecoder("utf8").
+		// Supported encodings: https://developer.mozilla.org/en-US/docs/Web/API/Encoding_API/Encodings
+
+		console.log("File to open:" ,fileHandler);
+		myName = fileHandler.name;
+		const reader = new FileReader();
+		reader.addEventListener('load', (event) => {
+				rawFileContents = event.target.result;
+				console.log("Loaded: ", event, rawFileContents.length);
+				fileContentsUInt8 = new Uint8Array(rawFileContents); // Extract from the generic ArrayBuffer an array of Unsigned Integers (0..255)
+				console.log(fileContentsUInt8);
+				document.getElementById("status").innerHTML = "File loaded. Click link to start emulator: ";
+                document.getElementById("startlink").removeAttribute("hidden");
+                document.getElementById("lastdisk").innerHTML=myName;
+                writeToEmulatorFileSystem("/readwritefs","FILE_DATA", 21,fileContentsUInt8, myName)
+		});
+		reader.readAsArrayBuffer(fileHandler); // Read as arrayBuffer as "readAsBinaryString" is deprecated but we don't want Javascript to interpret the file at its own wish...
+		console.log("Reading process initiated...");
+	}
+
+
+
+function debugRead(dbName, name2, name3,dbVer) {
+	let openRequest = indexedDB.open(dbName, dbVer);
+
+	openRequest.onupgradeneeded = function() {
+	  // triggers if the client had no database
+	  // ...perform initialization...
+	};
+
+	openRequest.onerror = function() {
+	  console.error("Error", openRequest.error);
+	};
+
+	openRequest.onsuccess = function() {
+	  db = openRequest.result;
+	  transaction = db.transaction(name2, "readwrite");
+	  transaction.oncomplete = function () {
+	console.log("result:");
+		lista.result.forEach((f) => {
+			console.log(f);
+		});
+	  }
+
+	console.log("tr", transaction);
+	  filenames = transaction.objectStore(name3);
+	console.log("filenames",  filenames);
+	  lista=filenames.getAll();
+	console.log("lista",  lista);
+
+	};
+}
+
+
+
+function writeToEmulatorFileSystem(dbName, tableName, dbVer, filecontents, filename) {
+	console.log("Opening db ", dbName , " to add record '" ,filename , " in ", tableName);
+	let openRequest = indexedDB.open(dbName, dbVer);
+
+	openRequest.onupgradeneeded = function() {
+	  // triggers if the client had no database
+	  // ...perform initialization...
+	};
+
+	openRequest.onerror = function() {
+	  console.error("Error while writing file ",filename,  openRequest.error);
+	};
+
+	openRequest.onsuccess = function() {
+		db = openRequest.result;
+		try {
+			transaction = db.transaction(tableName, "readwrite");
+		} catch (e) {
+
+		}
+		fileObjects = transaction.objectStore(tableName);
+
+		let fileobject = {
+			contents: filecontents,
+			mode: 33206,
+			timestamp: new Date()
+		};
+
+		sessionStorage.file = filename; // Filename is read by emulator from browser's sessionStorage
+		let writeRequest = fileObjects.add(fileobject, "/readwritefs/" + filename); // File contents are read by emulator from browser's IndexedDB
+
+		console.log("writeRequest",writeRequest);
+
+		writeRequest.onsuccess = function() {
+			console.log("File added", writeRequest.result);
+	        fileObjects = transaction.objectStore(tableName);
+			console.log("filenames",  fileObjects);
+			filesList = fileObjects.getAll();
+			console.log("list:",  filesList);
+		};
+
+		writeRequest.onerror = function() {
+		console.log("Error adding file", writeRequest.error);
+		};
+
+
+		transaction.oncomplete = function () {
+			console.log("Final list:");
+			filesList.result.forEach((f) => {
+				console.log("File: ", f);
+			});
+		}
+	}
+
+};
+
 </script>
 
 </body>
