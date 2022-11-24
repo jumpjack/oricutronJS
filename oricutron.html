@@ -131,19 +131,19 @@
 </head>
 <body>
 <center><big><big><big>Oricutron emulator for Javascript</big></big></big><br></center>
-<br>debug build 19
+<br>debug build 20
 <br>
-
 <b>Load a local .dsk file to put it into emulator filesystem:</b><br>
 <br>
-	<input type="file" id="inpFile" size="20"><br>
-	Status: <span id="status2">(waiting user selection)</span><br>
+<input type="file" id="inpFile" size="20"><br>
+Status: <span id="status2">(waiting user selection)</span><br>
 Once the dsk has been properly loaded into filesystem, a START link will appear here below: click it to restart emulator
 automatically loading disk; all previously loaded disks will remain available in the emulator filesystem (right click, insert disk, navigate up to /readwritefs folder).<br>
 <br>
-	<a href="oricutron.html" id="startlink" hidden>START</a><br>
+<a href="oricutron.html" id="startlink" hidden>START</a><br>
 <br>
 <br>
+Debug:<br>
 Last loaded file: <span id="lastloaded" >-</span><br>
 Files already present in emulator filesystem:<br>
  <span id="allfiles" >-</span><br>
@@ -151,11 +151,7 @@ Files already present in emulator filesystem:<br>
  <br>
 Start emulator without loading any disk: <button onclick="sessionStorage.file=''; location.reload();">START</button><br>
 Start emulator with demo disk (to create filesystem):  <button onclick="sessionStorage.file='space1999-en.dsk'; location.reload();">START</button><br>
-<br>
-<br>
-<br>
-Debug:<br>
-<button onclick="sessionStorage.file=''">Delete filename from storage</button><br>
+<br><button onclick="sessionStorage.file=''">Delete filename from storage</button><br>
 <button onclick="clearDB()">Delete emulator filesystem from IndexedDB</button> (WARNING: GAME PROGRESS WILL BE ERASED!)<br>
 DB1: <span id="status3" >-</span><br>
 DB2: <span id="status4" >-</span><br>
