@@ -131,7 +131,7 @@
 </head>
 <body>
 <center><big><big><big>Oricutron emulator for Javascript</big></big></big><br></center>
-<br>debug6
+<br>debug7
 
 <b>Load a local .dsk file to put it into emulator filesystem:</b><br>
 <br>
@@ -230,15 +230,9 @@ Module.setStatus("Downloading..."), window.onerror = function (e) {
 
     allfiles.innerHTML = "(none)";
 	try {
-		avail = readFilenames("/readwritefs","FILE_DATA",21);
-		avail.forEach((name) => {
-			bt = document.createElement("button");
-			bt.setAttribute("onclick", "sessionStorage.file = '" + name + "'; location.reload()");
-			bt.innerHTML = name;
-			allfiles.appendChild(bt);
-		});
+		readFilenames("/readwritefs","FILE_DATA",21);
 	} catch (er) {
-        llfiles.innerHTML = "(error)";
+        allfiles.innerHTML = "(error)";
 		console.log(er);
 	}
 
@@ -359,6 +353,10 @@ function readFilenames(dbName, name2, name3,dbVer) {
 	  transaction.oncomplete = function () {
 	console.log("result:");
 		lista.result.forEach((f) => {
+			bt = document.createElement("button");
+			bt.setAttribute("onclick", "sessionStorage.file = '" + f + "'; location.reload()");
+			bt.innerHTML = f;
+			allfiles.appendChild(bt);
 			console.log(f);
 		});
 	  }
@@ -366,8 +364,6 @@ function readFilenames(dbName, name2, name3,dbVer) {
 	  filenames = transaction.objectStore(name2);
 	  lista=filenames.getAllKeys();
 console.log("lista",  lista);
-
-	return lista.result;
 	};
 }
 
