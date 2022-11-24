@@ -131,7 +131,7 @@
 </head>
 <body>
 <center><big><big><big>Oricutron emulator for Javascript</big></big></big><br></center>
-<br>debug build 14
+<br>debug build 15<br>
 
 <b>Load a local .dsk file to put it into emulator filesystem:</b><br>
 <br>
@@ -353,30 +353,28 @@ function readFilenames(dbName, tableName, name3,dbVer) {
 	  try {
 console.log("Searching db '" + tableName + "'...");
 	  	transaction = db.transaction(tableName, "readwrite");
-	  } catch (er) {
-console.log("     ERROR - Db '" + tableName + "' not found!");
-	  }
+		transaction.oncomplete = function () {
+			lista.result.forEach((f) => {
+				// Get only filename from full path:
+				temp = f.split("/");
+				onlyName = temp[temp.length-1];
 
-	  transaction.oncomplete = function () {
-		lista.result.forEach((f) => {
-			// Get only filename from full path:
-			temp = f.split("/");
-			onlyName = temp[temp.length-1];
-
-			// Add one button per each file:
-			br = document.createElement("br");
-			bt = document.createElement("button");
-			bt.setAttribute("onclick", "sessionStorage.file = '" + onlyName + "'; location.reload()");
-			bt.innerHTML = onlyName;
-			allfiles.appendChild(bt);
-			allfiles.appendChild(br);
+				// Add one button per each file:
+				br = document.createElement("br");
+				bt = document.createElement("button");
+				bt.setAttribute("onclick", "sessionStorage.file = '" + onlyName + "'; location.reload()");
+				bt.innerHTML = onlyName;
+				allfiles.appendChild(bt);
+				allfiles.appendChild(br);
 console.log(f, onlyName);
-		});
-	  }
-
-	  filenames = transaction.objectStore(tableName);
-	  lista=filenames.getAllKeys();
-console.log("raw list (early): ",  lista);
+			});
+		}
+		  filenames = transaction.objectStore(tableName);
+		  lista=filenames.getAllKeys();
+		} catch (er) {
+console.log("     ERROR - Db '" + tableName + "' not found?");
+	        allfiles.innerHTML = "Database error.";
+		}
 	};
 }
 
